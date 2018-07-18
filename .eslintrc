@@ -1,0 +1,27 @@
+{
+  "env": {
+    "browser": true
+  },
+  "extends": [
+    "airbnb-base"
+  ],
+  "rules": {
+    "import/no-extraneous-dependencies": ["error", {
+      "devDependencies": true,
+      "optionalDependencies": true,
+      "peerDependencies": false
+    }],
+    "padded-blocks": ["error", {
+      "blocks": "never",
+      "classes": "always"
+    }],
+    "no-multi-spaces": ["error", {
+      "ignoreEOLComments": true
+    }],
+    "no-underscore-dangle": ["off"],
+    "no-param-reassign": ["error", {
+      "props": false
+    }],
+    "no-undef": "error"
+  }
+}

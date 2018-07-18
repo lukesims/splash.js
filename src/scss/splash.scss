@@ -1,0 +1,52 @@
+@import 'variables';
+@import 'keyframes';
+
+.#{$pre} {
+  position: relative;
+  overflow: hidden;
+  z-index: inherit;
+}
+
+.#{$pre}-waves,
+.#{$pre}-wrap {
+  display: block;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.#{$pre}-waves {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  // background: purple;
+}
+
+.#{$pre}-wrap {
+  position: relative;
+  z-index: 2;
+  // background: orange;
+}
+
+.#{$pre}-wave {
+  display: block;
+  position: absolute;
+  width: 0;
+  height: 0;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  transition: all $duration ease;
+  background: $wave-start-color;
+  opacity: $wave-start-opacity;
+
+  &.#{$pre}-wave-out {
+    transform: translate(-50%, -50%) scale(1);
+    background: $wave-end-color;
+    opacity: $wave-end-opacity;
+  }
+}
