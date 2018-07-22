@@ -29,7 +29,9 @@
       color: #4169e1;
       font-weight: 700;
     }
-    .card {
+    button {
+      background: #fff;
+      outline: none;
       border: none;
     }
     .splash-custom {
@@ -47,27 +49,102 @@
 
   <div class="container">
 
-    <button class="splash" type="button" style="border-radius: 0;">
-      Hover me
-    </button>
+    <div class="row">
+      <div class="col text-center">
 
-    &emsp;
+        <button
+          class="splash"
+          type="button"
+          style="">
+          Hover me
+        </button>
 
-    <button
-     class="splash splash-custom"
-     type="button"
-     style="width:150px; height:150px; border-radius:0;">
-      <strong>Hover me</strong>
-    </button>
+      </div>
+      <div class="col text-center">
 
-  </div>
+        <button
+          class="splash"
+          type="button"
+          style="width:200px; height:50px;">
+          Hover me
+        </button>
+
+      </div>
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:250px; height:100px;">
+          Hover me
+        </button>
+
+      </div>
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:150px; height:150px;">
+          Hover me
+        </button>
+
+      </div>
+    </div><!-- .row -->
+
+    <div class="row mt-4">
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:150px; height:250px;">
+          Hover me
+        </button>
+
+      </div>
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:100px; height:120px;">
+          Hover me
+        </button>
+
+      </div>
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:250px; height:20px;">
+          Hover me
+        </button>
+
+      </div>
+      <div class="col text-center">
+
+        <button
+          class="splash"
+          type="button"
+          style="width:250px; height:250px;">
+          Hover me
+        </button>
+
+      </div>
+    </div><!-- .row -->
+
+  </div><!-- .container -->
 
   <script src="../dist/js/splash.js"></script>
   <script type="text/javascript">
 
     (function() {
 
-      var splash = new Splash;
+      var splash = new Splash();
+
+      var elems = splash.init();
 
     })();
 
