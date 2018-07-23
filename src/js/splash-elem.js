@@ -61,8 +61,6 @@ export default class SplashElement {
     this.wrap();
     // Add event listeners to this element
     this.addEventListeners();
-    // Return the instance
-    return this;
   }
 
   /**
@@ -138,10 +136,10 @@ export default class SplashElement {
    *
    */
   getWave() {
-    const ts = this.elem.getAttribute(this.cfg.attr);
+    const ts = this.elem.getAttribute(this.cfg.attr.wave);
     const wave = this.active[ts];
     delete this.active[ts];
-    this.elem.removeAttribute(this.cfg.attr);
+    this.elem.removeAttribute(this.cfg.attr.wave);
     return wave;
   }
 
@@ -167,7 +165,7 @@ export default class SplashElement {
   save(wave) {
     const ts = Date.now();
     this.active[ts] = wave;
-    this.elem.setAttribute(this.cfg.attr, ts);
+    this.elem.setAttribute(this.cfg.attr.wave, ts);
   }
 
   /**
@@ -204,11 +202,20 @@ export default class SplashElement {
   }
 
   /**
+   *
+   */
+  update(config = {}) {
+    this.cfg = Object.assign({}, config);
+  }
+
+  /**
    * Wraps this element's contents so we can add wave effects
    *
    * @returns {undefined}
    */
   wrap() {
+    // Ensure the element has the base class
+    addClass(this.elem, this.cfg.class.base);
     // We should only proceed if the element is not already wrapped
     if (this.isWrapped) return;
     // Create our wrapper

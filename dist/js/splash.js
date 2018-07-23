@@ -227,8 +227,6 @@
       this.wrap();
       // Add event listeners to this element
       this.addEventListeners();
-      // Return the instance
-      return this;
     }
 
     /**
@@ -304,10 +302,10 @@
     }, {
       key: 'getWave',
       value: function getWave() {
-        var ts = this.elem.getAttribute(this.cfg.attr);
+        var ts = this.elem.getAttribute(this.cfg.attr.wave);
         var wave = this.active[ts];
         delete this.active[ts];
-        this.elem.removeAttribute(this.cfg.attr);
+        this.elem.removeAttribute(this.cfg.attr.wave);
         return wave;
       }
 
@@ -325,7 +323,7 @@
       value: function save(wave) {
         var ts = Date.now();
         this.active[ts] = wave;
-        this.elem.setAttribute(this.cfg.attr, ts);
+        this.elem.setAttribute(this.cfg.attr.wave, ts);
       }
 
       /**
@@ -365,6 +363,18 @@
       }
 
       /**
+       *
+       */
+
+    }, {
+      key: 'update',
+      value: function update() {
+        var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        this.cfg = Object.assign({}, config);
+      }
+
+      /**
        * Wraps this element's contents so we can add wave effects
        *
        * @returns {undefined}
@@ -373,6 +383,8 @@
     }, {
       key: 'wrap',
       value: function wrap() {
+        // Ensure the element has the base class
+        addClass(this.elem, this.cfg.class.base);
         // We should only proceed if the element is not already wrapped
         if (this.isWrapped) return;
         // Create our wrapper
@@ -428,9 +440,12 @@
 
   // Default options for the library
   var defaultConfig = {
-    attr: 'data-splash-waves',
     click: false,
     hover: true,
+    attr: {
+      base: 'data-splash',
+      wave: 'data-splash-wave'
+    },
     class: {
       base: 'splash',
       disabled: 'disabled',
@@ -442,13 +457,46 @@
   };
 
   var Splash = function () {
+    createClass(Splash, [{
+      key: 'attach',
 
-    /**
-     * Sets up the class
-     *
-     * @param {Object|undefined} config - The user-specified configuration settings
-     * @returns {undefined}
-     */
+
+      /**
+       * [attach description]
+       *
+       * @param  {[type]} selection [description]
+       * @param  {Object} config    [description]
+       * @return {[type]}           [description]
+       */
+      value: function attach(selection) {
+        var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        // Normalize the user's selection
+        var elements = this.normalize(selection);
+        // Make sure `config` is an object
+        var cfg = this.ts.call(config) !== '[object Object]' ? {} : config;
+        // Merge config with defaults (overriding)
+        cfg = Object.assign({}, this.cfg, cfg);
+        // Loop the elements and init/update them
+        for (var i = 0; i < elements.length; i += 1) {
+          // See if we have already touched that element
+          var found = this.find(elements[i]);
+          // If we have, update its config
+          if (found !== undefined) found.update(cfg);
+          // If we haven't, create a new instance
+          else this.active.push(new SplashElement(elements[i], cfg));
+        }
+      }
+
+      /**
+       * Sets up the class
+       *
+       * @param {Object|undefined} config - The user-specified configuration
+       * @returns {undefined}
+       */
+
+    }]);
+
     function Splash() {
       var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       classCallCheck(this, Splash);
@@ -464,11 +512,26 @@
     }
 
     /**
+     * [find description]
      *
+     * @param  {[type]} elem [description]
+     * @return {[type]}      [description]
      */
 
 
     createClass(Splash, [{
+      key: 'find',
+      value: function find(elem) {
+        return this.active.find(function (splashElement) {
+          return splashElement.elem === elem;
+        });
+      }
+
+      /**
+       *
+       */
+
+    }, {
       key: 'init',
       value: function init() {
         this.active = [];
@@ -476,8 +539,7 @@
         var elements = this.$('.' + this.cfg.class.base);
         // Instantiate splash on each element with current config
         for (var i = 0; i < elements.length; i += 1) {
-          var se = new SplashElement(elements[i], this.cfg);
-          this.active.push(se);
+          this.active.push(new SplashElement(elements[i], this.cfg));
         }
       }
 
@@ -486,9 +548,9 @@
        */
 
     }, {
-      key: '_normalize',
-      value: function _normalize(selection) {
-        if (typeof selection === 'string') return this.$$(selection);
+      key: 'normalize',
+      value: function normalize(selection) {
+        if (typeof selection === 'string') return this.$(selection);
         if (isList(selection)) return selection;
         if (isElem(selection)) return [selection];
         return [];
