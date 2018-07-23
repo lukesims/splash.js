@@ -20,6 +20,11 @@
 .splash-waves {
   position: absolute;
   pointer-events: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-tap-highlight-color: transparent;
   z-index: 1; }
 
 .splash-wrap {

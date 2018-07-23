@@ -21,14 +21,14 @@
 .#{$pre}-waves {
   position: absolute;
   pointer-events: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
   z-index: 1;
-  // background: purple;
 }
 
 .#{$pre}-wrap {
   position: relative;
   z-index: 2;
-  // background: orange;
 }
 
 .#{$pre}-wave {
