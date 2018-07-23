@@ -19,8 +19,8 @@ export default class SplashElement {
    * @returns {undefined}
    */
   addEventListeners() {
-    this.elem.addEventListener('mouseenter', e => this.startHover(e), false);
-    this.elem.addEventListener('mouseleave', e => this.endHover(e), false);
+    this.elem.addEventListener('mouseenter', this.handler.mouseenter, false);
+    this.elem.addEventListener('mouseleave', this.handler.mouseleave, false);
   }
 
   /**
@@ -60,7 +60,24 @@ export default class SplashElement {
     // Wrap this element's content with our required elements
     this.wrap();
     // Add event listeners to this element
+    //  Save references on the class so that if the event listeners are removed
+    //  in future, we are definitely referencing the same methods.
+    this.handler = {
+      mouseenter: this.startHover.bind(this),
+      mouseleave: this.endHover.bind(this),
+    };
     this.addEventListeners();
+  }
+
+  /**
+   * Destroys all functionality attached to this Splash element by removing
+   * the event listeners and returning the markup to its initial state.
+   *
+   * @returns {undefined}
+   */
+  destroy() {
+    this.removeEventListeners();
+    this.unwrap();
   }
 
   /**
@@ -133,13 +150,13 @@ export default class SplashElement {
   }
 
   /**
+   * Gets the currently active hover wave
    *
+   * @returns {HTMLElement}
    */
   getWave() {
-    const ts = this.elem.getAttribute(this.cfg.attr.wave);
-    const wave = this.active[ts];
-    delete this.active[ts];
-    this.elem.removeAttribute(this.cfg.attr.wave);
+    const wave = this.active;
+    delete this.active;
     return wave;
   }
 
@@ -160,12 +177,23 @@ export default class SplashElement {
   }
 
   /**
+   * Removes our event listeners from this Splash element
    *
+   * @returns {undefined}
+   */
+  removeEventListeners() {
+    this.elem.removeEventListener('mouseenter', this.handler.mouseenter, false);
+    this.elem.removeEventListener('mouseleave', this.handler.mouseleave, false);
+  }
+
+  /**
+   * Saves a reference to a given wave to be accessed later
+   *
+   * @param {HTMLElement} wave - The wave to save
+   * @returns {undefined}
    */
   save(wave) {
-    const ts = Date.now();
-    this.active[ts] = wave;
-    this.elem.setAttribute(this.cfg.attr.wave, ts);
+    this.active = wave;
   }
 
   /**
@@ -202,7 +230,29 @@ export default class SplashElement {
   }
 
   /**
+   * Unwraps this element's contents and returns to its normal markup
    *
+   * @returns {undefined}
+   */
+  unwrap() {
+    // Remove the waves container
+    this.elem.removeChild(this.waves);
+    this.waves = null;
+    // Unwrap the original content
+    while (this.wrapper.firstChild) {
+      this.elem.insertBefore(this.wrapper.firstChild, this.wrapper);
+    }
+    this.elem.removeChild(this.wrapper);
+    this.wrapper = null;
+    // Remove the base class
+    removeClass(this.elem, this.cfg.class.base);
+  }
+
+  /**
+   * Updates the configuration for this Splash element
+   *
+   * @param {Object|undefined} config - The configuration settings
+   * @returns {undefined}
    */
   update(config = {}) {
     this.cfg = Object.assign({}, config);

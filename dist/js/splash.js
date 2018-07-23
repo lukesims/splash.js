@@ -170,14 +170,8 @@
        * @returns {undefined}
        */
       value: function addEventListeners() {
-        var _this = this;
-
-        this.elem.addEventListener('mouseenter', function (e) {
-          return _this.startHover(e);
-        }, false);
-        this.elem.addEventListener('mouseleave', function (e) {
-          return _this.endHover(e);
-        }, false);
+        this.elem.addEventListener('mouseenter', this.handler.mouseenter, false);
+        this.elem.addEventListener('mouseleave', this.handler.mouseleave, false);
       }
 
       /**
@@ -226,21 +220,41 @@
       // Wrap this element's content with our required elements
       this.wrap();
       // Add event listeners to this element
+      //  Save references on the class so that if the event listeners are removed
+      //  in future, we are definitely referencing the same methods.
+      this.handler = {
+        mouseenter: this.startHover.bind(this),
+        mouseleave: this.endHover.bind(this)
+      };
       this.addEventListeners();
     }
 
     /**
-     * Callback for the `mouseleave` event
+     * Destroys all functionality attached to this Splash element by removing
+     * the event listeners and returning the markup to its initial state.
      *
-     * @param {Event} e
      * @returns {undefined}
      */
 
 
     createClass(SplashElement, [{
+      key: 'destroy',
+      value: function destroy() {
+        this.removeEventListeners();
+        this.unwrap();
+      }
+
+      /**
+       * Callback for the `mouseleave` event
+       *
+       * @param {Event} e
+       * @returns {undefined}
+       */
+
+    }, {
       key: 'endHover',
       value: function endHover(e) {
-        var _this2 = this;
+        var _this = this;
 
         e.stopPropagation();
         // Determine the offset of the element relative to the viewport
@@ -258,7 +272,7 @@
         var waveDur = SplashElement.getDuration(wave);
         // Wait for the animation to finish and remove the wave
         setTimeout(function () {
-          _this2.waves.removeChild(wave);
+          _this.waves.removeChild(wave);
         }, waveDur);
       }
 
@@ -296,16 +310,16 @@
       }
 
       /**
+       * Gets the currently active hover wave
        *
+       * @returns {HTMLElement}
        */
 
     }, {
       key: 'getWave',
       value: function getWave() {
-        var ts = this.elem.getAttribute(this.cfg.attr.wave);
-        var wave = this.active[ts];
-        delete this.active[ts];
-        this.elem.removeAttribute(this.cfg.attr.wave);
+        var wave = this.active;
+        delete this.active;
         return wave;
       }
 
@@ -314,16 +328,30 @@
        */
 
     }, {
-      key: 'save',
+      key: 'removeEventListeners',
 
 
       /**
+       * Removes our event listeners from this Splash element
        *
+       * @returns {undefined}
        */
+      value: function removeEventListeners() {
+        this.elem.removeEventListener('mouseenter', this.handler.mouseenter, false);
+        this.elem.removeEventListener('mouseleave', this.handler.mouseleave, false);
+      }
+
+      /**
+       * Saves a reference to a given wave to be accessed later
+       *
+       * @param {HTMLElement} wave - The wave to save
+       * @returns {undefined}
+       */
+
+    }, {
+      key: 'save',
       value: function save(wave) {
-        var ts = Date.now();
-        this.active[ts] = wave;
-        this.elem.setAttribute(this.cfg.attr.wave, ts);
+        this.active = wave;
       }
 
       /**
@@ -363,7 +391,32 @@
       }
 
       /**
+       * Unwraps this element's contents and returns to its normal markup
        *
+       * @returns {undefined}
+       */
+
+    }, {
+      key: 'unwrap',
+      value: function unwrap() {
+        // Remove the waves container
+        this.elem.removeChild(this.waves);
+        this.waves = null;
+        // Unwrap the original content
+        while (this.wrapper.firstChild) {
+          this.elem.insertBefore(this.wrapper.firstChild, this.wrapper);
+        }
+        this.elem.removeChild(this.wrapper);
+        this.wrapper = null;
+        // Remove the base class
+        removeClass(this.elem, this.cfg.class.base);
+      }
+
+      /**
+       * Updates the configuration for this Splash element
+       *
+       * @param {Object|undefined} config - The configuration settings
+       * @returns {undefined}
        */
 
     }, {
@@ -442,10 +495,6 @@
   var defaultConfig = {
     click: false,
     hover: true,
-    attr: {
-      base: 'data-splash',
-      wave: 'data-splash-wave'
-    },
     class: {
       base: 'splash',
       disabled: 'disabled',
@@ -512,14 +561,29 @@
     }
 
     /**
-     * [find description]
+     * [destroy description]
      *
-     * @param  {[type]} elem [description]
-     * @return {[type]}      [description]
+     * @return {[type]} [description]
      */
 
 
     createClass(Splash, [{
+      key: 'destroy',
+      value: function destroy() {
+        for (var i = 0; i < this.active.length; i += 1) {
+          this.active[i].destroy();
+          delete this.active[i];
+        }
+      }
+
+      /**
+       * [find description]
+       *
+       * @param  {[type]} elem [description]
+       * @return {[type]}      [description]
+       */
+
+    }, {
       key: 'find',
       value: function find(elem) {
         return this.active.find(function (splashElement) {
@@ -535,9 +599,7 @@
       key: 'init',
       value: function init() {
         this.active = [];
-        // Locate the splash elements
         var elements = this.$('.' + this.cfg.class.base);
-        // Instantiate splash on each element with current config
         for (var i = 0; i < elements.length; i += 1) {
           this.active.push(new SplashElement(elements[i], this.cfg));
         }

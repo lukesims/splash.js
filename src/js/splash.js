@@ -9,10 +9,6 @@ import SplashElement from './splash-elem';
 const defaultConfig = {
   click: false,
   hover: true,
-  attr: {
-    base: 'data-splash',
-    wave: 'data-splash-wave',
-  },
   class: {
     base: 'splash',
     disabled: 'disabled',
@@ -68,6 +64,18 @@ export default class Splash {
   }
 
   /**
+   * [destroy description]
+   *
+   * @return {[type]} [description]
+   */
+  destroy() {
+    for (let i = 0; i < this.active.length; i += 1) {
+      this.active[i].destroy();
+      delete this.active[i];
+    }
+  }
+
+  /**
    * [find description]
    *
    * @param  {[type]} elem [description]
@@ -82,9 +90,7 @@ export default class Splash {
    */
   init() {
     this.active = [];
-    // Locate the splash elements
     const elements = this.$(`.${this.cfg.class.base}`);
-    // Instantiate splash on each element with current config
     for (let i = 0; i < elements.length; i += 1) {
       this.active.push(new SplashElement(elements[i], this.cfg));
     }
