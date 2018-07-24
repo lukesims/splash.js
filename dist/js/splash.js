@@ -324,7 +324,9 @@
       }
 
       /**
-       * Determines if this element is disabled
+       * Determines if this element is disabled, either by attribute or class
+       *
+       * @returns {Boolean}
        */
 
     }, {
@@ -458,7 +460,7 @@
     }, {
       key: 'isDisabled',
       get: function get$$1() {
-        return hasClass(this.elem, this.cfg.class.disabled);
+        return this.elem.hasAttribute('disabled') || hasClass(this.elem, this.cfg.class.disabled);
       }
 
       /**
@@ -586,9 +588,9 @@
     }, {
       key: 'find',
       value: function find(elem) {
-        return this.active.find(function (splashElement) {
+        return this.active.filter(function (splashElement) {
           return splashElement.elem === elem;
-        });
+        })[0];
       }
 
       /**

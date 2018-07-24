@@ -161,10 +161,13 @@ export default class SplashElement {
   }
 
   /**
-   * Determines if this element is disabled
+   * Determines if this element is disabled, either by attribute or class
+   *
+   * @returns {Boolean}
    */
   get isDisabled() {
-    return hasClass(this.elem, this.cfg.class.disabled);
+    return this.elem.hasAttribute('disabled')
+        || hasClass(this.elem, this.cfg.class.disabled);
   }
 
   /**

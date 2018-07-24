@@ -82,7 +82,7 @@ export default class Splash {
    * @return {[type]}      [description]
    */
   find(elem) {
-    return this.active.find(splashElement => splashElement.elem === elem);
+    return this.active.filter(splashElement => splashElement.elem === elem)[0];
   }
 
   /**
