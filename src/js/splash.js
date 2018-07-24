@@ -3,7 +3,7 @@ import {
   isList,
 } from './util';
 
-import SplashElement from './splash-elem';
+import SplashElement from './splash-element';
 
 // Default options for the library
 const defaultConfig = {
