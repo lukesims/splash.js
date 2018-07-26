@@ -19,8 +19,12 @@ export default class SplashElement {
    * @returns {undefined}
    */
   addEventListeners() {
+    // Hover
     this.elem.addEventListener('mouseenter', this.handler.mouseenter, false);
     this.elem.addEventListener('mouseleave', this.handler.mouseleave, false);
+    // Click
+    this.elem.addEventListener('mousedown', this.handler.mousedown, false);
+    this.elem.addEventListener('mouseup', this.handler.mouseup, false);
   }
 
   /**
@@ -65,6 +69,8 @@ export default class SplashElement {
     this.handler = {
       mouseenter: this.startHover.bind(this),
       mouseleave: this.endHover.bind(this),
+      mousedown: this.startClick.bind(this),
+      mouseup: this.endClick.bind(this),
     };
     this.addEventListeners();
   }
@@ -78,6 +84,16 @@ export default class SplashElement {
   destroy() {
     this.removeEventListeners();
     this.unwrap();
+  }
+
+  /**
+   * Callback for the `mouseup` event on this Splash element
+   *
+   * @param {Event} e
+   * @returns {undefined}
+   */
+  endClick(e) {
+    //
   }
 
   /**
@@ -197,6 +213,16 @@ export default class SplashElement {
    */
   save(wave) {
     this.active = wave;
+  }
+
+  /**
+   * Callback for the `mousedown` event on this Splash element
+   *
+   * @param {Event} e
+   * @returns {undefined}
+   */
+  startClick(e) {
+    //
   }
 
   /**
