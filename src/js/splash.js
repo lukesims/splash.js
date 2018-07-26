@@ -22,11 +22,12 @@ const defaultConfig = {
 export default class Splash {
 
   /**
-   * [attach description]
+   * Attach Splash functionality to a selection of elements on the page, that
+   * do not necessarily have the base class.
    *
-   * @param  {[type]} selection [description]
-   * @param  {Object} config    [description]
-   * @return {[type]}           [description]
+   * @param  {String|NodeList|HTMLElement} selection - The element(s) to use
+   * @param  {Object} config - A config object, overriding the instance's defaults
+   * @return {undefined}
    */
   attach(selection, config = {}) {
     // Normalize the user's selection
@@ -64,9 +65,11 @@ export default class Splash {
   }
 
   /**
-   * [destroy description]
+   * Destroys all Splash functionality for the currently active elements created
+   * by this Splash instance. Unwraps the element's original content and removes
+   * event listeners.
    *
-   * @return {[type]} [description]
+   * @return {undefined}
    */
   destroy() {
     for (let i = 0; i < this.active.length; i += 1) {
@@ -76,17 +79,21 @@ export default class Splash {
   }
 
   /**
-   * [find description]
+   * Finds the SplashElement instance (created by this Splash instance) for the
+   * given HTMLElement, if it exists.
    *
-   * @param  {[type]} elem [description]
-   * @return {[type]}      [description]
+   * @param {HTMLElement} element - The element to search for
+   * @return {SplashElement|undefined}
    */
-  find(elem) {
-    return this.active.filter(splashElement => splashElement.elem === elem)[0];
+  find(element) {
+    return this.active.filter(splashElement => splashElement.elem === element)[0];
   }
 
   /**
+   * Initializes the Splash functionality for all elements on the page with
+   * the correct base class.
    *
+   * @returns {undefined}
    */
   init() {
     this.active = [];
@@ -97,7 +104,11 @@ export default class Splash {
   }
 
   /**
+   * Takes an element selection (as a selector string, NodeList or HTMLElement)
+   * from the user and returns a consistent list of elements to work with.
    *
+   * @param {String|NodeList|HTMLElement} selection - The selection of elements
+   * @returns {NodeList|Array[HTMLElement]}
    */
   normalize(selection) {
     if (typeof selection === 'string') return this.$(selection);
