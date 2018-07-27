@@ -22,7 +22,7 @@
     "css-compile-default": "node build/styles.js --input=src/scss/splash.scss --name=splash.css --prefix",
     "css-compile-min": "node build/styles.js --input=src/scss/splash.scss --name=splash.min.css --prefix --minify",
     "css-lint": "stylelint --syntax scss \"src/scss/**/*.scss\"",
-    "test": "node test/test.js",
+    "test": "jest",
     "pretest": "npm run build"
   },
   "devDependencies": {
