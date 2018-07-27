@@ -1,11 +1,4 @@
-import {
-  addClass,
-  first,
-  getOffset,
-  hasClass,
-  newElem,
-  removeClass,
-} from './util';
+import { first, getOffset, newElem } from './util';
 
 /**
  * This class represents an individual .splash element.
@@ -25,6 +18,11 @@ export default class SplashElement {
     // Click
     this.elem.addEventListener('mousedown', this.handler.mousedown, false);
     this.elem.addEventListener('mouseup', this.handler.mouseup, false);
+    //
+    // touchstart
+    // touchmove
+    // touchend
+    // touchcancel
   }
 
   /**
@@ -93,7 +91,8 @@ export default class SplashElement {
    * @returns {undefined}
    */
   endClick(e) {
-    //
+    console.log(this);
+    console.log(e);
   }
 
   /**
@@ -114,7 +113,7 @@ export default class SplashElement {
     wave.style.left = `${e.pageX - offset.x}px`;
     wave.style.top = `${e.pageY - offset.y}px`;
     // Bring the wave back in
-    removeClass(wave, this.cfg.class.waveOut);
+    wave.classList.remove(this.cfg.class.waveOut);
     // Determine how long the animations are set to take
     const waveDur = SplashElement.getDuration(wave);
     // Wait for the animation to finish and remove the wave
@@ -183,7 +182,7 @@ export default class SplashElement {
    */
   get isDisabled() {
     return this.elem.hasAttribute('disabled')
-        || hasClass(this.elem, this.cfg.class.disabled);
+        || this.elem.classList.contains(this.cfg.class.disabled);
   }
 
   /**
@@ -222,7 +221,8 @@ export default class SplashElement {
    * @returns {undefined}
    */
   startClick(e) {
-    //
+    console.log(this);
+    console.log(e);
   }
 
   /**
@@ -255,7 +255,7 @@ export default class SplashElement {
     wave.style.width = `${2 * size}px`;
     wave.style.height = `${2 * size}px`;
     // Make the wave spread out
-    addClass(wave, this.cfg.class.waveOut);
+    wave.classList.add(this.cfg.class.waveOut);
   }
 
   /**
@@ -274,7 +274,7 @@ export default class SplashElement {
     this.elem.removeChild(this.wrapper);
     this.wrapper = null;
     // Remove the base class
-    removeClass(this.elem, this.cfg.class.base);
+    this.elem.classList.remove(this.cfg.class.base);
   }
 
   /**
@@ -294,7 +294,7 @@ export default class SplashElement {
    */
   wrap() {
     // Ensure the element has the base class
-    addClass(this.elem, this.cfg.class.base);
+    this.elem.classList.add(this.cfg.class.base);
     // We should only proceed if the element is not already wrapped
     if (this.isWrapped) return;
     // Create our wrapper

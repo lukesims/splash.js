@@ -35,54 +35,6 @@
   }();
 
   /**
-   * Determines if the given element has the given class
-   *
-   * @author https://stackoverflow.com/users/3773265/emil
-   * @link https://stackoverflow.com/a/28344281
-   *
-   * @param {HTMLElement} element - The DOM element to test
-   * @param {String} cls - The class name to check for
-   * @returns {Boolean} True if `element` has class `cls`, false if not
-   */
-  function hasClass(element, cls) {
-    var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
-    return !!element.className.match(reg);
-  }
-
-  /**
-   * Adds a class to an element's class list if it does not already exist
-   *
-   * @author https://stackoverflow.com/users/3773265/emil
-   * @link https://stackoverflow.com/a/28344281
-   *
-   * @param {HTMLElement} element - The DOM element to update
-   * @param {String} cls - The class name to add
-   * @returns {undefined}
-   */
-  function addClass(element, cls) {
-    if (!hasClass(element, cls)) {
-      element.className += ' ' + cls;
-    }
-  }
-
-  /**
-   * Removes a class from an element's class list if it exists
-   *
-   * @author https://stackoverflow.com/users/3773265/emil
-   * @link https://stackoverflow.com/a/28344281
-   *
-   * @param {HTMLElement} element - The DOM element to update
-   * @param {String} cls - The class name to remove
-   * @returns {undefined}
-   */
-  function removeClass(element, cls) {
-    if (hasClass(element, cls)) {
-      var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
-      element.className = element.className.replace(reg, ' ');
-    }
-  }
-
-  /**
    * Finds the first immediate child with the class `className` of the `element`.
    *
    * @param {HTMLElement} element - The DOM element to search
@@ -92,7 +44,7 @@
   function first(element, className) {
     var found = void 0;
     for (var i = 0; i < element.children.length; i += 1) {
-      if (hasClass(element.children[i], className)) {
+      if (element.children[i].classList.contains(className)) {
         found = element.children[i];
         break;
       }
@@ -170,8 +122,17 @@
        * @returns {undefined}
        */
       value: function addEventListeners() {
+        // Hover
         this.elem.addEventListener('mouseenter', this.handler.mouseenter, false);
         this.elem.addEventListener('mouseleave', this.handler.mouseleave, false);
+        // Click
+        this.elem.addEventListener('mousedown', this.handler.mousedown, false);
+        this.elem.addEventListener('mouseup', this.handler.mouseup, false);
+        //
+        // touchstart
+        // touchmove
+        // touchend
+        // touchcancel
       }
 
       /**
@@ -224,7 +185,9 @@
       //  in future, we are definitely referencing the same methods.
       this.handler = {
         mouseenter: this.startHover.bind(this),
-        mouseleave: this.endHover.bind(this)
+        mouseleave: this.endHover.bind(this),
+        mousedown: this.startClick.bind(this),
+        mouseup: this.endClick.bind(this)
       };
       this.addEventListeners();
     }
@@ -242,6 +205,20 @@
       value: function destroy() {
         this.removeEventListeners();
         this.unwrap();
+      }
+
+      /**
+       * Callback for the `mouseup` event on this Splash element
+       *
+       * @param {Event} e
+       * @returns {undefined}
+       */
+
+    }, {
+      key: 'endClick',
+      value: function endClick(e) {
+        console.log(this);
+        console.log(e);
       }
 
       /**
@@ -267,7 +244,7 @@
         wave.style.left = e.pageX - offset.x + 'px';
         wave.style.top = e.pageY - offset.y + 'px';
         // Bring the wave back in
-        removeClass(wave, this.cfg.class.waveOut);
+        wave.classList.remove(this.cfg.class.waveOut);
         // Determine how long the animations are set to take
         var waveDur = SplashElement.getDuration(wave);
         // Wait for the animation to finish and remove the wave
@@ -357,6 +334,20 @@
       }
 
       /**
+       * Callback for the `mousedown` event on this Splash element
+       *
+       * @param {Event} e
+       * @returns {undefined}
+       */
+
+    }, {
+      key: 'startClick',
+      value: function startClick(e) {
+        console.log(this);
+        console.log(e);
+      }
+
+      /**
        * Callback for the `mouseenter` event on this Splash element
        *
        * @param {Event} e
@@ -389,7 +380,7 @@
         wave.style.width = 2 * size + 'px';
         wave.style.height = 2 * size + 'px';
         // Make the wave spread out
-        addClass(wave, this.cfg.class.waveOut);
+        wave.classList.add(this.cfg.class.waveOut);
       }
 
       /**
@@ -411,7 +402,7 @@
         this.elem.removeChild(this.wrapper);
         this.wrapper = null;
         // Remove the base class
-        removeClass(this.elem, this.cfg.class.base);
+        this.elem.classList.remove(this.cfg.class.base);
       }
 
       /**
@@ -439,7 +430,7 @@
       key: 'wrap',
       value: function wrap() {
         // Ensure the element has the base class
-        addClass(this.elem, this.cfg.class.base);
+        this.elem.classList.add(this.cfg.class.base);
         // We should only proceed if the element is not already wrapped
         if (this.isWrapped) return;
         // Create our wrapper
@@ -460,7 +451,7 @@
     }, {
       key: 'isDisabled',
       get: function get$$1() {
-        return this.elem.hasAttribute('disabled') || hasClass(this.elem, this.cfg.class.disabled);
+        return this.elem.hasAttribute('disabled') || this.elem.classList.contains(this.cfg.class.disabled);
       }
 
       /**
@@ -513,11 +504,12 @@
 
 
       /**
-       * [attach description]
+       * Attach Splash functionality to a selection of elements on the page, that
+       * do not necessarily have the base class.
        *
-       * @param  {[type]} selection [description]
-       * @param  {Object} config    [description]
-       * @return {[type]}           [description]
+       * @param  {String|NodeList|HTMLElement} selection - The element(s) to use
+       * @param  {Object} config - A config object, overriding the instance's defaults
+       * @return {undefined}
        */
       value: function attach(selection) {
         var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -563,9 +555,11 @@
     }
 
     /**
-     * [destroy description]
+     * Destroys all Splash functionality for the currently active elements created
+     * by this Splash instance. Unwraps the element's original content and removes
+     * event listeners.
      *
-     * @return {[type]} [description]
+     * @return {undefined}
      */
 
 
@@ -579,22 +573,26 @@
       }
 
       /**
-       * [find description]
+       * Finds the SplashElement instance (created by this Splash instance) for the
+       * given HTMLElement, if it exists.
        *
-       * @param  {[type]} elem [description]
-       * @return {[type]}      [description]
+       * @param {HTMLElement} element - The element to search for
+       * @return {SplashElement|undefined}
        */
 
     }, {
       key: 'find',
-      value: function find(elem) {
+      value: function find(element) {
         return this.active.filter(function (splashElement) {
-          return splashElement.elem === elem;
+          return splashElement.elem === element;
         })[0];
       }
 
       /**
+       * Initializes the Splash functionality for all elements on the page with
+       * the correct base class.
        *
+       * @returns {undefined}
        */
 
     }, {
@@ -608,7 +606,11 @@
       }
 
       /**
+       * Takes an element selection (as a selector string, NodeList or HTMLElement)
+       * from the user and returns a consistent list of elements to work with.
        *
+       * @param {String|NodeList|HTMLElement} selection - The selection of elements
+       * @returns {NodeList|Array[HTMLElement]}
        */
 
     }, {

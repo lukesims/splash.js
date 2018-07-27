@@ -1,52 +1,4 @@
 /**
- * Determines if the given element has the given class
- *
- * @author https://stackoverflow.com/users/3773265/emil
- * @link https://stackoverflow.com/a/28344281
- *
- * @param {HTMLElement} element - The DOM element to test
- * @param {String} cls - The class name to check for
- * @returns {Boolean} True if `element` has class `cls`, false if not
- */
-export function hasClass(element, cls) {
-  const reg = new RegExp(`(\\s|^)${cls}(\\s|$)`);
-  return !!element.className.match(reg);
-}
-
-/**
- * Adds a class to an element's class list if it does not already exist
- *
- * @author https://stackoverflow.com/users/3773265/emil
- * @link https://stackoverflow.com/a/28344281
- *
- * @param {HTMLElement} element - The DOM element to update
- * @param {String} cls - The class name to add
- * @returns {undefined}
- */
-export function addClass(element, cls) {
-  if (!hasClass(element, cls)) {
-    element.className += ` ${cls}`;
-  }
-}
-
-/**
- * Removes a class from an element's class list if it exists
- *
- * @author https://stackoverflow.com/users/3773265/emil
- * @link https://stackoverflow.com/a/28344281
- *
- * @param {HTMLElement} element - The DOM element to update
- * @param {String} cls - The class name to remove
- * @returns {undefined}
- */
-export function removeClass(element, cls) {
-  if (hasClass(element, cls)) {
-    const reg = new RegExp(`(\\s|^)${cls}(\\s|$)`);
-    element.className = element.className.replace(reg, ' ');
-  }
-}
-
-/**
  * Finds the first immediate child with the class `className` of the `element`.
  *
  * @param {HTMLElement} element - The DOM element to search
@@ -56,7 +8,7 @@ export function removeClass(element, cls) {
 export function first(element, className) {
   let found;
   for (let i = 0; i < element.children.length; i += 1) {
-    if (hasClass(element.children[i], className)) {
+    if (element.children[i].classList.contains(className)) {
       found = element.children[i];
       break;
     }

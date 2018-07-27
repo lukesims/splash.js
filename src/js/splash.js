@@ -1,7 +1,4 @@
-import {
-  isElem,
-  isList,
-} from './util';
+import { isElem, isList } from './util';
 
 import SplashElement from './splash-element';
 
