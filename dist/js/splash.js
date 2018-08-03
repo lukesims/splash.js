@@ -311,7 +311,7 @@
         // Now we can calculate the required radius of the circle by using
         // pythagoras theorem - a^2 + b^2 = c^2 - in this context, a and b are
         // `dx` and `dy` and `c` is the radius value we need.
-        return Math.sqrt(dx * dx + dy * dy);
+        return Math.ceil(Math.sqrt(dx * dx + dy * dy));
       }
 
       /**
