@@ -34,18 +34,29 @@
     };
   }();
 
+  var toConsumableArray = function (arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  };
+
   /**
-   * Finds the first immediate child with the class `className` of the `element`.
+   * Finds the first immediate child with the class `className` of the `parent`.
    *
-   * @param {HTMLElement} element - The DOM element to search
+   * @param {HTMLElement} parent - The DOM element to search
    * @param {String} className - The class name to search for
    * @returns {undefined|HTMLElement}
    */
-  function first(element, className) {
+  function first(parent, className) {
     var found = void 0;
-    for (var i = 0; i < element.children.length; i += 1) {
-      if (element.children[i].classList.contains(className)) {
-        found = element.children[i];
+    if (!parent || !parent.children) return found;
+    for (var i = 0; i < parent.children.length; i += 1) {
+      if (parent.children[i].classList.contains(className)) {
+        found = parent.children[i];
         break;
       }
     }
@@ -74,10 +85,12 @@
    *
    */
   function newElem(selector) {
-    var classes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    var _element$classList;
 
-    var element = document.createElement('div');
-    element.className = classes;
+    var classes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+    var element = document.createElement(selector);
+    (_element$classList = element.classList).add.apply(_element$classList, toConsumableArray(classes));
     return element;
   }
 
@@ -91,7 +104,7 @@
    * @returns {Boolean} True if `o` is a DOM element object, false if not
    */
   function isElem(o) {
-    return (typeof HTMLElement === 'undefined' ? 'undefined' : _typeof(HTMLElement)) === 'object' ? o instanceof HTMLElement : o && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName === 'string';
+    return (typeof HTMLElement === 'undefined' ? 'undefined' : _typeof(HTMLElement)) === 'object' ? o instanceof HTMLElement : !!o && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName === 'string';
   }
 
   /**
@@ -103,8 +116,23 @@
    */
   function isList(o) {
     var str = Object.prototype.toString.call(o);
-    return !!o && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && /^\[object (Array|HTMLCollection|NodeList|Object)\]$/.test(str) && o.length;
+    return !!o && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && !!(o.length || Object.keys(o).length) && /^\[object (Array|HTMLCollection|NodeList|Object)\]$/.test(str);
   }
+
+  // The default configuration for the library.
+  //   Separated into another file so it can be pulled into tests.
+  var defaultConfig = {
+    click: false,
+    hover: true,
+    class: {
+      base: 'splash',
+      disabled: 'disabled',
+      wave: 'splash-wave',
+      waveOut: 'splash-wave-out',
+      waves: 'splash-waves',
+      wrap: 'splash-wrap'
+    }
+  };
 
   /**
    * This class represents an individual .splash element.
@@ -146,7 +174,7 @@
       key: 'createWave',
       value: function createWave() {
         // Create a new element for our wave
-        var wave = newElem('div', this.cfg.class.wave);
+        var wave = newElem('div', [this.cfg.class.wave]);
         // Insert the wave into the waves container
         this.waves.appendChild(wave);
         // Save a reference to the wave
@@ -434,14 +462,14 @@
         // We should only proceed if the element is not already wrapped
         if (this.isWrapped) return;
         // Create our wrapper
-        var wrapper = newElem('div', this.cfg.class.wrap);
+        var wrapper = newElem('div', [this.cfg.class.wrap]);
         // Wrap the element's content
         this.elem.appendChild(wrapper);
         while (this.elem.firstChild !== wrapper) {
           wrapper.appendChild(this.elem.firstChild);
         }
         // Create the waves container
-        var waves = newElem('div', this.cfg.class.waves);
+        var waves = newElem('div', [this.cfg.class.waves]);
         // Insert the waves before the content wrapper
         this.elem.insertBefore(waves, wrapper);
         // Saves references to the waves container and the wrapper
@@ -483,20 +511,6 @@
     }]);
     return SplashElement;
   }();
-
-  // Default options for the library
-  var defaultConfig = {
-    click: false,
-    hover: true,
-    class: {
-      base: 'splash',
-      disabled: 'disabled',
-      wave: 'splash-wave',
-      waveOut: 'splash-wave-out',
-      waves: 'splash-waves',
-      wrap: 'splash-wrap'
-    }
-  };
 
   var Splash = function () {
     createClass(Splash, [{

@@ -1,20 +1,7 @@
 import { isElem, isList } from './util';
 
+import defaultConfig from './config';
 import SplashElement from './splash-element';
-
-// Default options for the library
-const defaultConfig = {
-  click: false,
-  hover: true,
-  class: {
-    base: 'splash',
-    disabled: 'disabled',
-    wave: 'splash-wave',
-    waveOut: 'splash-wave-out',
-    waves: 'splash-waves',
-    wrap: 'splash-wrap',
-  },
-};
 
 export default class Splash {
 

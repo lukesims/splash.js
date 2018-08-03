@@ -33,7 +33,7 @@ export default class SplashElement {
    */
   createWave() {
     // Create a new element for our wave
-    const wave = newElem('div', this.cfg.class.wave);
+    const wave = newElem('div', [this.cfg.class.wave]);
     // Insert the wave into the waves container
     this.waves.appendChild(wave);
     // Save a reference to the wave
@@ -298,14 +298,14 @@ export default class SplashElement {
     // We should only proceed if the element is not already wrapped
     if (this.isWrapped) return;
     // Create our wrapper
-    const wrapper = newElem('div', this.cfg.class.wrap);
+    const wrapper = newElem('div', [this.cfg.class.wrap]);
     // Wrap the element's content
     this.elem.appendChild(wrapper);
     while (this.elem.firstChild !== wrapper) {
       wrapper.appendChild(this.elem.firstChild);
     }
     // Create the waves container
-    const waves = newElem('div', this.cfg.class.waves);
+    const waves = newElem('div', [this.cfg.class.waves]);
     // Insert the waves before the content wrapper
     this.elem.insertBefore(waves, wrapper);
     // Saves references to the waves container and the wrapper

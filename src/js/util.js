@@ -1,15 +1,16 @@
 /**
- * Finds the first immediate child with the class `className` of the `element`.
+ * Finds the first immediate child with the class `className` of the `parent`.
  *
- * @param {HTMLElement} element - The DOM element to search
+ * @param {HTMLElement} parent - The DOM element to search
  * @param {String} className - The class name to search for
  * @returns {undefined|HTMLElement}
  */
-export function first(element, className) {
+export function first(parent, className) {
   let found;
-  for (let i = 0; i < element.children.length; i += 1) {
-    if (element.children[i].classList.contains(className)) {
-      found = element.children[i];
+  if (!parent || !parent.children) return found;
+  for (let i = 0; i < parent.children.length; i += 1) {
+    if (parent.children[i].classList.contains(className)) {
+      found = parent.children[i];
       break;
     }
   }
@@ -37,9 +38,9 @@ export function getOffset(element) {
 /**
  *
  */
-export function newElem(selector, classes = '') {
-  const element = document.createElement('div');
-  element.className = classes;
+export function newElem(selector, classes = []) {
+  const element = document.createElement(selector);
+  element.classList.add(...classes);
   return element;
 }
 
@@ -53,11 +54,9 @@ export function newElem(selector, classes = '') {
  * @returns {Boolean} True if `o` is a DOM element object, false if not
  */
 export function isElem(o) {
-  return (
-    typeof HTMLElement === 'object'
-      ? o instanceof HTMLElement
-      : o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName === 'string'
-  );
+  return typeof HTMLElement === 'object'
+    ? o instanceof HTMLElement
+    : !!o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName === 'string';
 }
 
 /**
@@ -71,25 +70,8 @@ export function isList(o) {
   const str = Object.prototype.toString.call(o);
   return !!o
     && typeof o === 'object'
-    && /^\[object (Array|HTMLCollection|NodeList|Object)\]$/.test(str)
-    && o.length;
-}
-
-/**
- * Determines if the given value is a DOM node
- *
- * @author https://stackoverflow.com/users/36866/some
- * @link https://stackoverflow.com/a/384380/3389737
- *
- * @param {*} o - The variable being tested
- * @returns {Boolean} Whether `o` is a DOM Node object
- */
-export function isNode(o) {
-  return (
-    typeof Node === 'object'
-      ? o instanceof Node
-      : o && typeof o === 'object' && typeof o.nodeType === 'number' && typeof o.nodeName === 'string'
-  );
+    && !!(o.length || Object.keys(o).length)
+    && /^\[object (Array|HTMLCollection|NodeList|Object)\]$/.test(str);
 }
 
 /**
