@@ -8,13 +8,14 @@
   "scripts": {
     "build": "npm-run-all --parallel js css",
     "watch": "npm-run-all --parallel css-watch js-watch",
-    "js": "npm-run-all js-lint js-clean js-compile",
+    "js": "npm-run-all js-lint js-test js-clean js-compile",
     "js-watch": "nodemon --watch ./src/js -e js -x \"npm run js\"",
     "js-clean": "del-cli ./dist/js/**",
     "js-compile": "npm-run-all --parallel js-compile-*",
     "js-compile-default": "node build/scripts.js --input=src/js/splash.js --name=splash.js",
     "js-compile-min": "node build/scripts.js --input=src/js/splash.js --name=splash.min.js --uglify",
     "js-lint": "eslint src/js/ build/",
+    "js-test": "jest --verbose",
     "css": "npm-run-all css-lint css-clean css-compile",
     "css-watch": "nodemon --watch ./src/scss -e scss -x \"npm run css\"",
     "css-clean": "del-cli ./dist/css/**",
@@ -22,7 +23,6 @@
     "css-compile-default": "node build/styles.js --input=src/scss/splash.scss --name=splash.css --prefix",
     "css-compile-min": "node build/styles.js --input=src/scss/splash.scss --name=splash.min.css --prefix --minify",
     "css-lint": "stylelint --syntax scss \"src/scss/**/*.scss\"",
-    "test": "jest",
     "pretest": "npm run build"
   },
   "devDependencies": {
@@ -30,6 +30,7 @@
     "babel-core": "^6.26.3",
     "babel-jest": "^23.4.0",
     "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
     "cssnano": "^4.0.0",
     "del-cli": "^1.1.0",
