@@ -122,13 +122,16 @@
   // The default configuration for the library.
   //   Separated into another file so it can be pulled into tests.
   var defaultConfig = {
-    click: false,
+    click: true,
     hover: true,
     class: {
       base: 'splash',
+      clickWave: 'splash-click',
+      clickOut: 'splash-click-out',
       disabled: 'disabled',
-      wave: 'splash-wave',
-      waveOut: 'splash-wave-out',
+      fade: 'splash-fade',
+      hoverWave: 'splash-hover',
+      hoverOut: 'splash-hover-out',
       waves: 'splash-waves',
       wrap: 'splash-wrap'
     }
@@ -151,12 +154,12 @@
        */
       value: function addEventListeners() {
         // Hover
-        this.elem.addEventListener('mouseenter', this.handler.mouseenter, false);
-        this.elem.addEventListener('mouseleave', this.handler.mouseleave, false);
+        this.elem.addEventListener('mouseenter', this.handler.start, false);
+        this.elem.addEventListener('mouseleave', this.handler.end, false);
         // Click
-        this.elem.addEventListener('mousedown', this.handler.mousedown, false);
-        this.elem.addEventListener('mouseup', this.handler.mouseup, false);
-        //
+        this.elem.addEventListener('mousedown', this.handler.start, false);
+        this.elem.addEventListener('mouseup', this.handler.end, false);
+        // Touch
         // touchstart
         // touchmove
         // touchend
@@ -172,13 +175,13 @@
 
     }, {
       key: 'createWave',
-      value: function createWave() {
+      value: function createWave(key, className) {
         // Create a new element for our wave
-        var wave = newElem('div', [this.cfg.class.wave]);
+        var wave = newElem('div', [className]);
         // Insert the wave into the waves container
         this.waves.appendChild(wave);
         // Save a reference to the wave
-        this.save(wave);
+        this.saveWave(key, wave);
         // Return the wave for further manipulation
         return wave;
       }
@@ -200,22 +203,22 @@
       // Save references to the element and the config
       this.elem = element;
       this.cfg = config;
-      // Acts as a state for the currently active waves. When a hover wave is
-      // created, a reference is saved to this object and the triggering element,
-      // so that when the `mouseleave` event is triggered, we can find the correct
-      // wave element to operate on. Without this, nesting .splash elements and
-      // combining click/hover causes problems.
-      this.active = {};
+      // Acts as a state for the active waves. When a wave is created, a reference
+      // is saved to this property, so that if the wave needs to be manipulated in
+      // another event's callback, we can access safely it again. Without this,
+      // nesting .splash elements and combining click/hover causes problems.
+      this.active = {
+        click: null,
+        hover: null
+      };
       // Wrap this element's content with our required elements
       this.wrap();
       // Add event listeners to this element
       //  Save references on the class so that if the event listeners are removed
       //  in future, we are definitely referencing the same methods.
       this.handler = {
-        mouseenter: this.startHover.bind(this),
-        mouseleave: this.endHover.bind(this),
-        mousedown: this.startClick.bind(this),
-        mouseup: this.endClick.bind(this)
+        start: this.startEffect.bind(this),
+        end: this.endEffect.bind(this)
       };
       this.addEventListeners();
     }
@@ -245,34 +248,42 @@
     }, {
       key: 'endClick',
       value: function endClick(e) {
-        console.log(this);
-        console.log(e);
+        if (!this) {
+          console.log(e);
+        }
       }
 
       /**
-       * Callback for the `mouseleave` event
        *
-       * @param {Event} e
-       * @returns {undefined}
        */
 
     }, {
-      key: 'endHover',
-      value: function endHover(e) {
+      key: 'endEffect',
+      value: function endEffect(e) {
         var _this = this;
 
         e.stopPropagation();
+        // Determine which kind of wave this should be from the event type
+        // - 'hover' or 'click'
+        var type = SplashElement.getWaveType(e.type);
+        if (!type) return;
+        // Only need to proceed for hover
+        if (type !== 'hover') return;
+        // Do not proceed if the DOM element is disabled (attribute or class)
+        if (this.isDisabled) return;
+        // Do not proceed if the configuration has (click|hover) disabled
+        if (!this.cfg[type]) return;
         // Determine the offset of the element relative to the viewport
         var offset = getOffset(this.elem);
-        // Find the wave element
-        var wave = this.getWave();
+        // Find the hover wave element
+        var wave = this.getWave(type);
         // Position the wave where the cursor left the splash element
         // In order to get left/top values relative to the position of the element,
         // we must subtract the element's offset from the co-ordinates of the event.
         wave.style.left = e.pageX - offset.x + 'px';
         wave.style.top = e.pageY - offset.y + 'px';
         // Bring the wave back in
-        wave.classList.remove(this.cfg.class.waveOut);
+        wave.classList.remove(this.cfg.class[type + 'Out']);
         // Determine how long the animations are set to take
         var waveDur = SplashElement.getDuration(wave);
         // Wait for the animation to finish and remove the wave
@@ -315,23 +326,23 @@
       }
 
       /**
-       * Gets the currently active hover wave
+       * Gets a reference to a wave element from the 'active' object
        *
        * @returns {HTMLElement}
        */
 
     }, {
       key: 'getWave',
-      value: function getWave() {
-        var wave = this.active;
-        delete this.active;
+      value: function getWave(key) {
+        // Check that the key actually exists first
+        if (!Object.prototype.hasOwnProperty.call(this.active, key)) return undefined;
+        var wave = this.active[key];
+        delete this.active[key];
         return wave;
       }
 
       /**
-       * Determines if this element is disabled, either by attribute or class
        *
-       * @returns {Boolean}
        */
 
     }, {
@@ -349,66 +360,71 @@
       }
 
       /**
-       * Saves a reference to a given wave to be accessed later
+       * Saves a reference to a given (hover) wave to be accessed later
        *
-       * @param {HTMLElement} wave - The wave to save
+       * @param {HTMLElement} wave - The (hover) wave to save
        * @returns {undefined}
        */
 
     }, {
-      key: 'save',
-      value: function save(wave) {
-        this.active = wave;
+      key: 'saveWave',
+      value: function saveWave(key, wave) {
+        this.active[key] = wave;
       }
 
       /**
-       * Callback for the `mousedown` event on this Splash element
        *
-       * @param {Event} e
-       * @returns {undefined}
        */
 
     }, {
-      key: 'startClick',
-      value: function startClick(e) {
-        console.log(this);
-        console.log(e);
-      }
+      key: 'startEffect',
+      value: function startEffect(e) {
+        var _this2 = this;
 
-      /**
-       * Callback for the `mouseenter` event on this Splash element
-       *
-       * @param {Event} e
-       * @returns {undefined}
-       */
-
-    }, {
-      key: 'startHover',
-      value: function startHover(e) {
         e.stopPropagation();
-        // Do not proceed if hover or the element itself is disabled
+        // Determine which kind of wave this should be from the event type
+        // - 'hover' or 'click'
+        var type = SplashElement.getWaveType(e.type);
+        if (!type) return;
+        // Do not proceed if the DOM element is disabled (attribute or class)
         if (this.isDisabled) return;
-        if (!this.cfg.hover) return;
+        // Do not proceed if the configuration has (click|hover) disabled
+        if (!this.cfg[type]) return;
         // Determine the offset of the element relative to the viewport
         var offset = getOffset(this.elem);
         // Create a new wave element inside our container
-        var wave = this.createWave();
-        // Determine the position of the event (the center of the wave's circle)
-        // relative to this Splash element. In order to get left/top values relative
-        // to the position of the element, we must subtract the element's offset
-        // from the co-ordinates of the event.
+        var wave = this.createWave(type, this.cfg.class[type + 'Wave']);
+        // Determine the position of the event (which will be used as the center of
+        // the wave's circle) relative to this Splash element.
+        // In order to get left|top values that are relative to the element, we
+        // must subtract the element's offset from the co-ordinates of the event.
         var posX = e.pageX - offset.x;
         var posY = e.pageY - offset.y;
-        // Position the wave where the cursor entered the Splash element
+        // Center the new wave element where the event took place
+        // - Either where the mouse entered the element or where a click took place
         wave.style.left = posX + 'px';
         wave.style.top = posY + 'px';
-        // Determine what the size for our wave should be
-        var size = this.getSize(posX, posY);
+        // Determine what size the wave should be
+        var radius = this.getSize(posX, posY);
         // Apply the size to the wave
-        wave.style.width = 2 * size + 'px';
-        wave.style.height = 2 * size + 'px';
+        wave.style.width = 2 * radius + 'px';
+        wave.style.height = 2 * radius + 'px';
         // Make the wave spread out
-        wave.classList.add(this.cfg.class.waveOut);
+        wave.classList.add(this.cfg.class[type + 'Out']);
+        // If this is a click wave we need to clean it up after the animation
+        if (type === 'click') {
+          // Determine how long the animations are set to take
+          var waveDur = SplashElement.getDuration(wave);
+          // Wait for the animation to finish..
+          setTimeout(function () {
+            // ..and fade out the wave
+            wave.classList.add(_this2.cfg.class.fade);
+            // Wait for the fading to finish and remove the wave
+            setTimeout(function () {
+              _this2.waves.removeChild(wave);
+            }, waveDur);
+          }, waveDur);
+        }
       }
 
       /**
@@ -478,6 +494,13 @@
       }
     }, {
       key: 'isDisabled',
+
+
+      /**
+       * Determines if this element is disabled, either by attribute or class
+       *
+       * @returns {Boolean}
+       */
       get: function get$$1() {
         return this.elem.hasAttribute('disabled') || this.elem.classList.contains(this.cfg.class.disabled);
       }
@@ -507,6 +530,24 @@
         // CSS only supports `s` and `ms` so the duration is in seconds
         // Therefore we need to multiply by 1000 to get the `ms` value
         return numDur * 1000;
+      }
+    }, {
+      key: 'getWaveType',
+      value: function getWaveType(eventType) {
+        var type = void 0;
+        switch (eventType) {
+          case 'mousedown':
+          case 'mouseup':
+            type = 'click';
+            break;
+          case 'mouseenter':
+          case 'mouseleave':
+            type = 'hover';
+            break;
+          default:
+            type = false;
+        }
+        return type;
       }
     }]);
     return SplashElement;
