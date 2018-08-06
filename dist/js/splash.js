@@ -246,22 +246,11 @@
       }
 
       /**
-       * Callback for the `mouseup` event on this Splash element
+       * Callback function for the 'mouseleave' and 'mouseup' events. Cleans up
+       * any existing waves by scaling or fading them out.
        *
        * @param {Event} e
        * @returns {undefined}
-       */
-
-    }, {
-      key: 'endClick',
-      value: function endClick(e) {
-        if (!this) {
-          console.log(e);
-        }
-      }
-
-      /**
-       *
        */
 
     }, {
@@ -359,7 +348,12 @@
       }
 
       /**
+       * Determines which type of Splash wave we need (click|hover) based on the
+       * provided eventType (mouseenter, mouseleave, mousedown etc.)
        *
+       * @param {String} eventType - The `type` property of the Event object passed
+       *                             to event listener callback functions.
+       * @returns {String|Boolean} Type of wave needed or false if eventType is invalid
        */
 
     }, {
@@ -390,7 +384,11 @@
       }
 
       /**
+       * Callback function for the 'mouseenter' and 'mousedown' events. Creates the
+       * wave element and starts the animations.
        *
+       * @param {Event} e
+       * @returns {undefined}
        */
 
     }, {
