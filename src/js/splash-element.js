@@ -1,5 +1,8 @@
 import { first, getOffset, newElem } from './util';
 
+const SP_CLICK = 'click';
+const SP_HOVER = 'hover';
+
 /**
  * This class represents an individual .splash element.
  * Allows each instantiation to have unique configurations.
@@ -16,8 +19,11 @@ export default class SplashElement {
     this.elem.addEventListener('mouseenter', this.handler.start, false);
     this.elem.addEventListener('mouseleave', this.handler.end, false);
     // Click
+    // - Listen for mouseup on document because even though the mousedown might
+    //   occur on our element, we cannot guarantee the mouseup event will, so we
+    //   need to listen for all mouseup events to enable tidying up the waves.
     this.elem.addEventListener('mousedown', this.handler.start, false);
-    this.elem.addEventListener('mouseup', this.handler.end, false);
+    document.addEventListener('mouseup', this.handler.end, false);
     // Touch
     // touchstart
     // touchmove
@@ -101,12 +107,12 @@ export default class SplashElement {
    */
   endEffect(e) {
     e.stopPropagation();
-    // Determine which kind of wave this should be from the event type
-    // - 'hover' or 'click'
+    // Determine which wave this should be from the event type (click|hover)
     const type = SplashElement.getWaveType(e.type);
     if (!type) return;
-    // Only need to proceed for hover
-    if (type !== 'hover') return;
+    // If this is a click wave and `waitForMouseup` is off, we don't need to
+    // do any cleanup as it has already been done in this.startEffect
+    if (type === SP_CLICK && !this.cfg.waitForMouseup) return;
     // Do not proceed if the DOM element is disabled (attribute or class)
     if (this.isDisabled) return;
     // Do not proceed if the configuration has (click|hover) disabled
@@ -115,16 +121,26 @@ export default class SplashElement {
     const offset = getOffset(this.elem);
     // Find the hover wave element
     const wave = this.getWave(type);
-    // Position the wave where the cursor left the splash element
-    // In order to get left/top values relative to the position of the element,
-    // we must subtract the element's offset from the co-ordinates of the event.
-    wave.style.left = `${e.pageX - offset.x}px`;
-    wave.style.top = `${e.pageY - offset.y}px`;
-    // Bring the wave back in
-    wave.classList.remove(this.cfg.class[`${type}Out`]);
+    if (!wave) return;
     // Determine how long the animations are set to take
     const waveDur = SplashElement.getDuration(wave);
-    // Wait for the animation to finish and remove the wave
+    // If this is a click wave, we simply need to fade it out
+    if (type === SP_CLICK) {
+      // Fade out the wave
+      wave.classList.add(this.cfg.class.fade);
+    }
+    // If this is a hover wave, we need to reposition the wave before scaling
+    if (type === SP_HOVER) {
+      // Position the wave where the cursor left the splash element
+      // In order to get left/top values relative to the position of the element,
+      // we must subtract the element's offset from the co-ordinates of the event.
+      wave.style.left = `${e.pageX - offset.x}px`;
+      wave.style.top = `${e.pageY - offset.y}px`;
+      // Bring the wave back in
+      wave.classList.remove(this.cfg.class[`${type}Out`]);
+    }
+    // For both, we need to wait until the scaling/fading has completed,
+    // and remove the wave from the DOM
     setTimeout(() => {
       this.waves.removeChild(wave);
     }, waveDur);
@@ -193,11 +209,11 @@ export default class SplashElement {
     switch (eventType) {
       case 'mousedown':
       case 'mouseup':
-        type = 'click';
+        type = SP_CLICK;
         break;
       case 'mouseenter':
       case 'mouseleave':
-        type = 'hover';
+        type = SP_HOVER;
         break;
       default:
         type = false;
@@ -249,8 +265,7 @@ export default class SplashElement {
    */
   startEffect(e) {
     e.stopPropagation();
-    // Determine which kind of wave this should be from the event type
-    // - 'hover' or 'click'
+    // Determine which wave this should be from the event type (click|hover)
     const type = SplashElement.getWaveType(e.type);
     if (!type) return;
     // Do not proceed if the DOM element is disabled (attribute or class)
@@ -278,8 +293,9 @@ export default class SplashElement {
     wave.style.height = `${2 * radius}px`;
     // Make the wave spread out
     wave.classList.add(this.cfg.class[`${type}Out`]);
-    // If this is a click wave we need to clean it up after the animation
-    if (type === 'click') {
+    // If this is a click wave and `waitForMouseup` is off, we need to clean it
+    // up after the animation is complete.
+    if (type === SP_CLICK && !this.cfg.waitForMouseup) {
       // Determine how long the animations are set to take
       const waveDur = SplashElement.getDuration(wave);
       // Wait for the animation to finish..

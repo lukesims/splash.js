@@ -3,6 +3,7 @@
 export default {
   click: true,
   hover: true,
+  waitForMouseup: false,
   class: {
     base: 'splash',
     clickWave: 'splash-click',
