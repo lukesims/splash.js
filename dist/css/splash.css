@@ -1,8 +1,7 @@
 /**
- *
+ * Sass Variables
  */
-@-webkit-keyframes splash-out {}
-@keyframes splash-out {}@-webkit-keyframes splash-in {}@keyframes splash-in {}.splash {
+.splash {
   position: relative;
   overflow: hidden;
   z-index: inherit; }
@@ -31,6 +30,7 @@
   position: relative;
   z-index: 2; }
 
+.splash-click,
 .splash-hover {
   display: block;
   position: absolute;
@@ -41,26 +41,9 @@
   -webkit-transform: translate(-50%, -50%) scale(0);
           transform: translate(-50%, -50%) scale(0);
   border-radius: 50%;
-  transition: all 0.4s ease;
-  background: rgba(255, 0, 0, 0.5);
-  opacity: 0; }
-  .splash-hover.splash-hover-out {
-    -webkit-transform: translate(-50%, -50%) scale(1);
-            transform: translate(-50%, -50%) scale(1);
-    background: rgba(0, 128, 0, 0.5);
-    opacity: 1; }
+  transition: all 0.4s ease; }
 
 .splash-click {
-  display: block;
-  position: absolute;
-  width: 0;
-  height: 0;
-  top: 0;
-  left: 0;
-  -webkit-transform: translate(-50%, -50%) scale(0);
-          transform: translate(-50%, -50%) scale(0);
-  border-radius: 50%;
-  transition: all 0.4s ease;
   background: rgba(0, 0, 0, 0.25);
   opacity: 0; }
   .splash-click.splash-click-out {
@@ -68,5 +51,14 @@
             transform: translate(-50%, -50%) scale(1);
     background: rgba(0, 0, 0, 0.25);
     opacity: 1; }
-  .splash-click.splash-fade {
+  .splash-click.splash-hide {
     opacity: 0; }
+
+.splash-hover {
+  background: rgba(255, 0, 0, 0.5);
+  opacity: 0; }
+  .splash-hover.splash-hover-out {
+    -webkit-transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1);
+    background: rgba(0, 128, 0, 0.5);
+    opacity: 1; }

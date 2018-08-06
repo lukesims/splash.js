@@ -119,7 +119,7 @@ export default class SplashElement {
     // If this is a click wave, we simply need to fade it out
     if (type === SP_CLICK) {
       // Fade out the wave
-      wave.classList.add(this.cfg.class.fade);
+      wave.classList.add(this.cfg.class.hide);
     }
     // If this is a hover wave, we need to reposition the wave before scaling
     if (type === SP_HOVER) {
@@ -302,7 +302,7 @@ export default class SplashElement {
       // Wait for the animation to finish..
       setTimeout(() => {
         // ..and fade out the wave
-        wave.classList.add(this.cfg.class.fade);
+        wave.classList.add(this.cfg.class.hide);
         // Wait for the fading to finish and remove the wave
         setTimeout(() => {
           this.waves.removeChild(wave);

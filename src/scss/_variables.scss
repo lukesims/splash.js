@@ -1,13 +1,23 @@
 /**
- *
+ * Sass Variables
  */
 
+// Prefix for all library class names
 $pre: splash;
 
-$duration: 0.4s;
+// The duration of the various animations
+$duration:       0.4s;
+$duration-click: $duration;
+$duration-hover: $duration;
 
-$wave-start-color:   rgba(red, 0.5);
-$wave-start-opacity: 0;
-$wave-end-color:     rgba(green, 0.5);
-$wave-end-opacity:   1;
+// Styling for click waves
+$wave-click-start-bg:      rgba(0, 0, 0, 0.25);
+$wave-click-end-bg:        rgba(0, 0, 0, 0.25);
+$wave-click-start-opacity: 0;
+$wave-click-end-opacity:   1;
 
+// Styling for hover waves
+$wave-hover-start-bg:      rgba(red, 0.5);
+$wave-hover-end-bg:        rgba(green, 0.5);
+$wave-hover-start-opacity: 0;
+$wave-hover-end-opacity:   1;

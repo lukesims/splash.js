@@ -9,7 +9,7 @@ export default {
     clickWave: 'splash-click',
     clickOut: 'splash-click-out',
     disabled: 'disabled',
-    fade: 'splash-fade',
+    hide: 'splash-hide',
     hoverWave: 'splash-hover',
     hoverOut: 'splash-hover-out',
     waves: 'splash-waves',

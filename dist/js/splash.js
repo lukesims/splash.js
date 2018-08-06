@@ -130,7 +130,7 @@
       clickWave: 'splash-click',
       clickOut: 'splash-click-out',
       disabled: 'disabled',
-      fade: 'splash-fade',
+      hide: 'splash-hide',
       hoverWave: 'splash-hover',
       hoverOut: 'splash-hover-out',
       waves: 'splash-waves',
@@ -279,7 +279,7 @@
         // If this is a click wave, we simply need to fade it out
         if (type === SP_CLICK) {
           // Fade out the wave
-          wave.classList.add(this.cfg.class.fade);
+          wave.classList.add(this.cfg.class.hide);
         }
         // If this is a hover wave, we need to reposition the wave before scaling
         if (type === SP_HOVER) {
@@ -433,7 +433,7 @@
           // Wait for the animation to finish..
           setTimeout(function () {
             // ..and fade out the wave
-            wave.classList.add(_this2.cfg.class.fade);
+            wave.classList.add(_this2.cfg.class.hide);
             // Wait for the fading to finish and remove the wave
             setTimeout(function () {
               _this2.waves.removeChild(wave);

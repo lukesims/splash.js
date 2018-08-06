@@ -1,12 +1,13 @@
 @import 'variables';
-@import 'keyframes';
 
+// The original element
 .#{$pre} {
   position: relative;
   overflow: hidden;
   z-index: inherit;
 }
 
+// The two wrappers created inside the original element
 .#{$pre}-waves,
 .#{$pre}-wrap {
   display: block;
@@ -18,6 +19,7 @@
   left: 0;
 }
 
+// The container for our waves effect
 .#{$pre}-waves {
   position: absolute;
   pointer-events: none;
@@ -26,11 +28,14 @@
   z-index: 1;
 }
 
+// The container for the original element's original content
 .#{$pre}-wrap {
   position: relative;
   z-index: 2;
 }
 
+// Both types of wave element
+.#{$pre}-click,
 .#{$pre}-hover {
   display: block;
   position: absolute;
@@ -41,36 +46,35 @@
   transform: translate(-50%, -50%) scale(0);
   border-radius: 50%;
   transition: all $duration ease;
-  background: $wave-start-color;
-  opacity: $wave-start-opacity;
+}
 
-  &.#{$pre}-hover-out {
+// The wave element for the click effect
+.#{$pre}-click {
+  background: $wave-click-start-bg;
+  opacity: $wave-click-start-opacity;
+
+  // The class to spread the wave out
+  &.#{$pre}-click-out {
     transform: translate(-50%, -50%) scale(1);
-    background: $wave-end-color;
-    opacity: $wave-end-opacity;
+    background: $wave-click-end-bg;
+    opacity: $wave-click-end-opacity;
+  }
+
+  // The class to fade an element out
+  &.#{$pre}-hide {
+    opacity: 0;
   }
 }
 
-.#{$pre}-click {
-  display: block;
-  position: absolute;
-  width: 0;
-  height: 0;
-  top: 0;
-  left: 0;
-  transform: translate(-50%, -50%) scale(0);
-  border-radius: 50%;
-  transition: all $duration ease;
-  background: rgba(0, 0, 0, 0.25);
-  opacity: 0;
+// The wave element for the hover effect
+.#{$pre}-hover {
+  background: $wave-hover-start-bg;
+  opacity: $wave-hover-start-opacity;
 
-  &.#{$pre}-click-out {
+  // The class to spread the wave out
+  &.#{$pre}-hover-out {
     transform: translate(-50%, -50%) scale(1);
-    background: rgba(0, 0, 0, 0.25);
-    opacity: 1;
-  }
-
-  &.#{$pre}-fade {
-    opacity: 0;
+    background: $wave-hover-end-bg;
+    opacity: $wave-hover-end-opacity;
   }
 }
