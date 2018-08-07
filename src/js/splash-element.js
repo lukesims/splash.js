@@ -13,8 +13,9 @@ export default class SplashElement {
    * Attachs our event listeners to this Splash element
    *
    * @returns {undefined}
+   * @private
    */
-  addEventListeners() {
+  addListeners() {
     // Hover
     this.elem.addEventListener('mouseenter', this.handler.start, false);
     this.elem.addEventListener('mouseleave', this.handler.end, false);
@@ -35,7 +36,10 @@ export default class SplashElement {
    * Creates a new element for a wave effect within the waves container inside
    * this Splash element.
    *
-   * @return {HTMLElement} The generated element for the wave effect
+   * @param {string} key - The type of wave; 'click' or 'hover'
+   * @param {string} className - The desired classname for the wave
+   * @return {HTMLElement} The generated element for the wave
+   * @private
    */
   createWave(key, className) {
     // Create a new element for our wave
@@ -76,7 +80,7 @@ export default class SplashElement {
       start: this.startEffect.bind(this),
       end: this.endEffect.bind(this),
     };
-    this.addEventListeners();
+    this.addListeners();
   }
 
   /**
@@ -86,7 +90,7 @@ export default class SplashElement {
    * @returns {undefined}
    */
   destroy() {
-    this.removeEventListeners();
+    this.removeListeners();
     this.unwrap();
   }
 
@@ -96,21 +100,19 @@ export default class SplashElement {
    *
    * @param {Event} e
    * @returns {undefined}
+   * @private
    */
   endEffect(e) {
     e.stopPropagation();
     // Determine which wave this should be from the event type (click|hover)
     const type = SplashElement.getWaveType(e.type);
-    if (!type) return;
     // If this is a click wave and `waitForMouseup` is off, we don't need to
     // do any cleanup as it has already been done in this.startEffect
     if (type === SP_CLICK && !this.cfg.waitForMouseup) return;
-    // Do not proceed if the DOM element is disabled (attribute or class)
-    if (this.isDisabled) return;
-    // Do not proceed if the configuration has (click|hover) disabled
-    if (!this.cfg[type]) return;
-    // Determine the offset of the element relative to the viewport
-    const offset = getOffset(this.elem);
+    // Check if we should proceed with the effect
+    if (!this.shouldContinue(type)) return;
+    // Determine the offset of the event relative to the element
+    const offset = this.getOffset(e);
     // Find the hover wave element
     const wave = this.getWave(type);
     if (!wave) return;
@@ -123,11 +125,11 @@ export default class SplashElement {
     }
     // If this is a hover wave, we need to reposition the wave before scaling
     if (type === SP_HOVER) {
-      // Position the wave where the cursor left the splash element
-      // In order to get left/top values relative to the position of the element,
-      // we must subtract the element's offset from the co-ordinates of the event.
-      wave.style.left = `${e.pageX - offset.x}px`;
-      wave.style.top = `${e.pageY - offset.y}px`;
+      // Center the wave where the cursor left the Splash element.
+      wave.style.left = `${offset.x}px`;
+      wave.style.top = `${offset.y}px`;
+      // Resize the wave so it fully covers the element
+      this.resizeWave(wave, offset);
       // Bring the wave back in
       wave.classList.remove(this.cfg.class[`${type}Out`]);
     }
@@ -144,6 +146,7 @@ export default class SplashElement {
    *
    * @param {HTMLElement} element - The element to test
    * @returns {Number} The duration in ms
+   * @private
    */
   static getDuration(element) {
     // Get the duration specified in the styles
@@ -160,20 +163,47 @@ export default class SplashElement {
   }
 
   /**
+   * Determine the offset of the event (`e`), relative to this Splash element
+   *
+   * @param {Event} e
+   * @returns {Object} offset - The calculated offset
+   * @returns {Number} offset.x - The calulcated left offset
+   * @returns {Number} offset.y - The calulcated top offset
+   * @private
+   */
+  getOffset(e) {
+    // Determine the offset of the element relative to the viewport
+    const offset = getOffset(this.elem);
+    // Determine the position of the event (which will be used as the center of
+    // the wave's circle) relative to this Splash element.
+    // In order to get left|top values that are relative to the element, we
+    // must subtract the element's offset from the co-ordinates of the event.
+    const posX = e.pageX - offset.x;
+    const posY = e.pageY - offset.y;
+    // Return the calculated offset
+    return {
+      x: posX,
+      y: posY,
+    };
+  }
+
+  /**
    * Determines how big a wave should be such that it completely covers this
    * Splash element which it is being displayed on.
    *
-   * @param {Number} posX - Horizontal position of the event (circle center)
-   * @param {Number} posY - Vertical position of the event (circle center)
+   * @param {Object} offset - The offset of the event relative to the element
+   * @param {Number} offset.x - Horizontal position of the event (circle center)
+   * @param {Number} offset.y - Vertical position of the event (circle center)
    * @returns {Number} The calculated radius for the wave's circle
+   * @private
    */
-  getSize(posX, posY) {
+  getSize(offset) {
     // Determine which point of the element the event took place furthest from
-    const fx = posX < this.elem.offsetWidth / 2 ? this.elem.offsetWidth : 0;
-    const fy = posY < this.elem.offsetHeight / 2 ? this.elem.offsetHeight : 0;
+    const fx = offset.x < this.elem.offsetWidth / 2 ? this.elem.offsetWidth : 0;
+    const fy = offset.y < this.elem.offsetHeight / 2 ? this.elem.offsetHeight : 0;
     // Calculate the distances from the event to the furthest point
-    const dx = Math.abs(posX - fx);
-    const dy = Math.abs(posY - fy);
+    const dx = Math.abs(offset.x - fx);
+    const dy = Math.abs(offset.y - fy);
     // Now we can calculate the required radius of the circle by using
     // pythagoras theorem - a^2 + b^2 = c^2 - in this context, a and b are
     // `dx` and `dy` and `c` is the radius value we need.
@@ -183,7 +213,9 @@ export default class SplashElement {
   /**
    * Gets a reference to a wave element from the 'active' object
    *
-   * @returns {HTMLElement}
+   * @param {String} key - The type of wave; 'click' or 'hover'
+   * @returns {HTMLElement|undefined}
+   * @private
    */
   getWave(key) {
     // Check that the key actually exists first
@@ -200,6 +232,7 @@ export default class SplashElement {
    * @param {String} eventType - The `type` property of the Event object passed
    *                             to event listener callback functions.
    * @returns {String|Boolean} Type of wave needed or false if eventType is invalid
+   * @private
    */
   static getWaveType(eventType) {
     let type;
@@ -222,6 +255,7 @@ export default class SplashElement {
    * Determines if this element is disabled, either by attribute or class
    *
    * @returns {Boolean}
+   * @private
    */
   get isDisabled() {
     return this.elem.hasAttribute('disabled')
@@ -232,6 +266,7 @@ export default class SplashElement {
    * Determines if this element's contents has already been wrapped
    *
    * @returns {Boolean}
+   * @private
    */
   get isWrapped() {
     return !!first(this.elem, this.cfg.class.waves);
@@ -241,20 +276,64 @@ export default class SplashElement {
    * Removes our event listeners from this Splash element
    *
    * @returns {undefined}
+   * @private
    */
-  removeEventListeners() {
-    this.elem.removeEventListener('mouseenter', this.handler.mouseenter, false);
-    this.elem.removeEventListener('mouseleave', this.handler.mouseleave, false);
+  removeListeners() {
+    // Hover
+    this.elem.removeEventListener('mouseenter', this.handler.start, false);
+    this.elem.removeEventListener('mouseleave', this.handler.end, false);
+    // Click
+    this.elem.removeEventListener('mousedown', this.handler.start, false);
+    document.removeEventListener('mouseup', this.handler.end, false);
   }
 
   /**
-   * Saves a reference to a given (hover) wave to be accessed later
+   * Resizes the given `wave` to an appropriate size, considering the `offset`
+   * of the event relative to the element.
    *
-   * @param {HTMLElement} wave - The (hover) wave to save
+   * @param {HTMLElement} wave - The wave to resize
+   * @param {Object} offset - The offset of the event relative to the element
+   * @param {Number} offset.x - Horizontal position of the event (circle center)
+   * @param {Number} offset.y - Vertical position of the event (circle center)
    * @returns {undefined}
+   * @private
+   */
+  resizeWave(wave, offset) {
+    // Determine what size the wave should be
+    const radius = this.getSize(offset);
+    // Apply the size to the wave
+    wave.style.width = `${2 * radius}px`;
+    wave.style.height = `${2 * radius}px`;
+  }
+
+  /**
+   * Saves a reference to a given wave to be accessed later
+   *
+   * @param {String} key - The type of wave; 'click' or 'hover'
+   * @param {HTMLElement} wave - The wave to save
+   * @returns {undefined}
+   * @private
    */
   saveWave(key, wave) {
     this.active[key] = wave;
+  }
+
+  /**
+   * Determines if execution should continue within the event listener callbacks
+   *
+   * @param {String} type - The type of wave; 'click' or 'hover'
+   * @returns {Boolean} - Whether to continue or not
+   * @private
+   */
+  shouldContinue(type) {
+    // Do not proceed if we were unable to discern a type
+    if (!type) return false;
+    // Do not proceed if the DOM element is disabled (attribute or class)
+    if (this.isDisabled) return false;
+    // Do not proceed if the configuration has (click|hover) disabled
+    if (!this.cfg[type]) return false;
+    // All is well
+    return true;
   }
 
   /**
@@ -263,35 +342,23 @@ export default class SplashElement {
    *
    * @param {Event} e
    * @returns {undefined}
+   * @private
    */
   startEffect(e) {
     e.stopPropagation();
     // Determine which wave this should be from the event type (click|hover)
     const type = SplashElement.getWaveType(e.type);
-    if (!type) return;
-    // Do not proceed if the DOM element is disabled (attribute or class)
-    if (this.isDisabled) return;
-    // Do not proceed if the configuration has (click|hover) disabled
-    if (!this.cfg[type]) return;
-    // Determine the offset of the element relative to the viewport
-    const offset = getOffset(this.elem);
+    // Check if we should proceed with the effect
+    if (!this.shouldContinue(type)) return;
+    // Determine the offset of the event relative to the element
+    const offset = this.getOffset(e);
     // Create a new wave element inside our container
     const wave = this.createWave(type, this.cfg.class[`${type}Wave`]);
-    // Determine the position of the event (which will be used as the center of
-    // the wave's circle) relative to this Splash element.
-    // In order to get left|top values that are relative to the element, we
-    // must subtract the element's offset from the co-ordinates of the event.
-    const posX = e.pageX - offset.x;
-    const posY = e.pageY - offset.y;
-    // Center the new wave element where the event took place
-    // - Either where the mouse entered the element or where a click took place
-    wave.style.left = `${posX}px`;
-    wave.style.top = `${posY}px`;
-    // Determine what size the wave should be
-    const radius = this.getSize(posX, posY);
-    // Apply the size to the wave
-    wave.style.width = `${2 * radius}px`;
-    wave.style.height = `${2 * radius}px`;
+    // Apply the offset to the wave
+    wave.style.left = `${offset.x}px`;
+    wave.style.top = `${offset.y}px`;
+    // Resize the wave so it fully covers the element
+    this.resizeWave(wave, offset);
     // Make the wave spread out
     wave.classList.add(this.cfg.class[`${type}Out`]);
     // If this is a click wave and `waitForMouseup` is off, we need to clean it
@@ -315,6 +382,7 @@ export default class SplashElement {
    * Unwraps this element's contents and returns to its normal markup
    *
    * @returns {undefined}
+   * @private
    */
   unwrap() {
     // Remove the waves container
@@ -344,6 +412,7 @@ export default class SplashElement {
    * Wraps this element's contents so we can add wave effects
    *
    * @returns {undefined}
+   * @private
    */
   wrap() {
     // Ensure the element has the base class

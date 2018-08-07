@@ -60,7 +60,11 @@ const plugins = [
 
 // Include Uglify in the plugin chain if necessary
 if (options.uglify) {
-  plugins.push(uglify.uglify());
+  plugins.push(uglify.uglify({
+    mangle: {
+      properties: true
+    }
+  }));
 }
 
 // Determine the filename/path

@@ -1,5 +1,6 @@
 {
   "presets": [["env", {
+    "modules": false,
     "targets": {
       "browsers": [
         "last 1 major version",
@@ -13,8 +14,7 @@
         "Android >= 4.4",
         "Opera >= 30"
       ]
-    },
-    "modules": false
+    }
   }]],
   "env": {
     "test": {
@@ -25,6 +25,9 @@
     }
   },
   "plugins": [
-    "external-helpers"
+    "external-helpers",
+    ["transform-es2015-classes", {
+      "loose": true
+    }]
   ]
 }
