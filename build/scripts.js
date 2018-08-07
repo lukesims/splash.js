@@ -62,8 +62,8 @@ const plugins = [
 if (options.uglify) {
   plugins.push(uglify.uglify({
     mangle: {
-      properties: true
-    }
+      properties: true,
+    },
   }));
 }
 
