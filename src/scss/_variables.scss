@@ -11,13 +11,13 @@ $duration-click: $duration;
 $duration-hover: $duration;
 
 // Styling for click waves
-$wave-click-start-bg:      rgba(0, 0, 0, 0.25);
-$wave-click-end-bg:        rgba(0, 0, 0, 0.25);
+$wave-click-start-bg:      rgba(0, 0, 0, 0.2);
+$wave-click-end-bg:        rgba(0, 0, 0, 0.2);
 $wave-click-start-opacity: 0;
 $wave-click-end-opacity:   1;
 
 // Styling for hover waves
-$wave-hover-start-bg:      rgba(red, 0.5);
-$wave-hover-end-bg:        rgba(green, 0.5);
+$wave-hover-start-bg:      rgba(0, 0, 0, 0.2);
+$wave-hover-end-bg:        rgba(0, 0, 0, 0.2);
 $wave-hover-start-opacity: 0;
 $wave-hover-end-opacity:   1;
