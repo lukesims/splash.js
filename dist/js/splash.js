@@ -141,6 +141,8 @@
   var SP_CLICK = 'click';
   var SP_HOVER = 'hover';
 
+  var SP_SPECIAL = ['input', 'textarea'];
+
   /**
    * This class represents an individual .splash element.
    * Allows each instantiation to have unique configurations.
@@ -574,7 +576,7 @@
     };
 
     /**
-     * Wraps this element's contents so we can add wave effects
+     * Wraps the element so that Splash functionality can be added.
      *
      * @returns {undefined}
      * @private
@@ -582,10 +584,26 @@
 
 
     SplashElement.prototype.wrap = function wrap() {
-      // Ensure the element has the base class
-      this.elem.classList.add(this.cfg.class.base);
       // We should only proceed if the element is not already wrapped
       if (this.isWrapped) return;
+      // Determine if we need to wrap the element alternatively,
+      // e.g. for inputs that do not allow child elements.
+      var special = SP_SPECIAL.includes(this.elem.tagName.toLowerCase());
+      // Wrap the element
+      this['wrap' + (special ? 'Special' : 'Default')]();
+    };
+
+    /**
+     * Wraps any regular element's contents so we can add the Splash effect.
+     *
+     * @returns {undefined}
+     * @private
+     */
+
+
+    SplashElement.prototype.wrapDefault = function wrapDefault() {
+      // Ensure the element has the base class
+      this.elem.classList.add(this.cfg.class.base);
       // Create our wrapper
       var wrapper = newElem('div', [this.cfg.class.wrap]);
       // Wrap the element's content
@@ -598,6 +616,37 @@
       // Insert the waves before the content wrapper
       this.elem.insertBefore(waves, wrapper);
       // Saves references to the waves container and the wrapper
+      this.waves = waves;
+      this.wrapper = wrapper;
+    };
+
+    /**
+     * Wraps special element's inside the Splash wrappers so we can add effects.
+     *
+     * @returns {undefined}
+     * @private
+     */
+
+
+    SplashElement.prototype.wrapSpecial = function wrapSpecial() {
+      // Remove the base class from the special element
+      this.elem.classList.remove(this.cfg.class.base);
+      // Wrap the special element in the Splash wrapper class
+      var wrapper = newElem('div', [this.cfg.class.wrap]);
+      this.elem.parentNode.insertBefore(wrapper, this.elem);
+      wrapper.appendChild(this.elem);
+      // Create the waves container and insert it before the wrapper
+      var waves = newElem('div', [this.cfg.class.waves]);
+      wrapper.parentNode.insertBefore(waves, wrapper);
+      // Wrap both the new elements in another new element with the base class
+      var parent = newElem('div', [this.cfg.class.base]);
+      waves.parentNode.insertBefore(parent, waves);
+      parent.appendChild(waves);
+      parent.appendChild(wrapper);
+      // We need to change the elem reference we have as it is expecting the
+      // element with the base class.
+      this.elem = parent;
+      // Save references to the waves container and the wrapper
       this.waves = waves;
       this.wrapper = wrapper;
     };
