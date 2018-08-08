@@ -3,7 +3,8 @@ import { first, getOffset, newElem } from './util';
 const SP_CLICK = 'click';
 const SP_HOVER = 'hover';
 
-const SP_SPECIAL = [
+// Void elements (https://www.w3.org/TR/html/syntax.html#void-elements)
+const SP_VOID = [
   'input',
   'textarea',
 ];
@@ -424,9 +425,9 @@ export default class SplashElement {
     if (this.isWrapped) return;
     // Determine if we need to wrap the element alternatively,
     // e.g. for inputs that do not allow child elements.
-    const special = SP_SPECIAL.includes(this.elem.tagName.toLowerCase());
+    const isVoid = SP_VOID.includes(this.elem.tagName.toLowerCase());
     // Wrap the element
-    this[`wrap${special ? 'Special' : 'Default'}`]();
+    this[`wrap${isVoid ? 'Void' : 'Default'}`]();
   }
 
   /**
@@ -455,15 +456,15 @@ export default class SplashElement {
   }
 
   /**
-   * Wraps special element's inside the Splash wrappers so we can add effects.
+   * Wraps void element's inside the Splash wrappers so we can add effects.
    *
    * @returns {undefined}
    * @private
    */
-  wrapSpecial() {
-    // Remove the base class from the special element
+  wrapVoid() {
+    // Remove the base class from the void element
     this.elem.classList.remove(this.cfg.class.base);
-    // Wrap the special element in the Splash wrapper class
+    // Wrap the void element in the Splash wrapper class
     const wrapper = newElem('div', [this.cfg.class.wrap]);
     this.elem.parentNode.insertBefore(wrapper, this.elem);
     wrapper.appendChild(this.elem);

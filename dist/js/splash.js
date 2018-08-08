@@ -123,7 +123,8 @@
   //   Separated into another file so it can be pulled into tests.
   var defaultConfig = {
     click: true,
-    hover: true,
+    focus: false,
+    hover: false,
     waitForMouseup: false,
     class: {
       base: 'splash',
@@ -141,7 +142,8 @@
   var SP_CLICK = 'click';
   var SP_HOVER = 'hover';
 
-  var SP_SPECIAL = ['input', 'textarea'];
+  // Void elements (https://www.w3.org/TR/html/syntax.html#void-elements)
+  var SP_VOID = ['input', 'textarea'];
 
   /**
    * This class represents an individual .splash element.
@@ -588,9 +590,9 @@
       if (this.isWrapped) return;
       // Determine if we need to wrap the element alternatively,
       // e.g. for inputs that do not allow child elements.
-      var special = SP_SPECIAL.includes(this.elem.tagName.toLowerCase());
+      var isVoid = SP_VOID.includes(this.elem.tagName.toLowerCase());
       // Wrap the element
-      this['wrap' + (special ? 'Special' : 'Default')]();
+      this['wrap' + (isVoid ? 'Void' : 'Default')]();
     };
 
     /**
@@ -621,17 +623,17 @@
     };
 
     /**
-     * Wraps special element's inside the Splash wrappers so we can add effects.
+     * Wraps void element's inside the Splash wrappers so we can add effects.
      *
      * @returns {undefined}
      * @private
      */
 
 
-    SplashElement.prototype.wrapSpecial = function wrapSpecial() {
-      // Remove the base class from the special element
+    SplashElement.prototype.wrapVoid = function wrapVoid() {
+      // Remove the base class from the void element
       this.elem.classList.remove(this.cfg.class.base);
-      // Wrap the special element in the Splash wrapper class
+      // Wrap the void element in the Splash wrapper class
       var wrapper = newElem('div', [this.cfg.class.wrap]);
       this.elem.parentNode.insertBefore(wrapper, this.elem);
       wrapper.appendChild(this.elem);
