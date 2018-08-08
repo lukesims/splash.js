@@ -25,13 +25,13 @@
   pointer-events: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  z-index: 1;
+  z-index: 2;
 }
 
 // The container for the original element's original content
 .#{$pre}-wrap {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 // Both types of wave element
