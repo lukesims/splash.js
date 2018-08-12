@@ -1,13 +1,11 @@
 import { first, getOffset, newElem } from './util';
 
 const SP_CLICK = 'click';
+const SP_FOCUS = 'focus';
 const SP_HOVER = 'hover';
 
-// Void elements (https://www.w3.org/TR/html/syntax.html#void-elements)
-const SP_VOID = [
-  'input',
-  'textarea',
-];
+// https://www.w3.org/TR/html/syntax.html#void-elements
+const SP_VOID = ['hr', 'img', 'input', 'select', 'textarea'];
 
 /**
  * This class represents an individual .splash element.
@@ -22,20 +20,25 @@ export default class SplashElement {
    * @private
    */
   addListeners() {
-    // Hover
-    this.elem.addEventListener('mouseenter', this.handler.start, false);
-    this.elem.addEventListener('mouseleave', this.handler.end, false);
+    // Determine which elements to add the event listeners to
+    const listenTo = this.isVoid ? this.wrapper.childNodes[0] : this.elem;
+    // Add hover event listeners
+    listenTo.addEventListener('mouseenter', this.handler.start, false);
+    listenTo.addEventListener('mouseleave', this.handler.end, false);
     // Click
     // - Listen for mouseup on document because even though the mousedown might
     //   occur on our element, we cannot guarantee the mouseup event will, so we
     //   need to listen for all mouseup events to enable tidying up the waves.
-    this.elem.addEventListener('mousedown', this.handler.start, false);
+    listenTo.addEventListener('mousedown', this.handler.start, false);
     document.addEventListener('mouseup', this.handler.end, false);
     // Touch
-    // touchstart
-    // touchmove
-    // touchend
-    // touchcancel
+    //   touchstart
+    //   touchmove
+    //   touchend
+    //   touchcancel
+    // Focus
+    listenTo.addEventListener('focus', this.handler.start, false);
+    listenTo.addEventListener('blur', this.handler.end, false);
   }
 
   /**
@@ -75,6 +78,7 @@ export default class SplashElement {
     // nesting .splash elements and combining click/hover causes problems.
     this.active = {
       click: null,
+      focus: null,
       hover: null,
     };
     // Wrap this element's content with our required elements
@@ -118,7 +122,7 @@ export default class SplashElement {
     // Check if we should proceed with the effect
     if (!this.shouldContinue(type)) return;
     // Determine the offset of the event relative to the element
-    const offset = this.getOffset(e);
+    const offset = this.getOffset(e, type);
     // Find the hover wave element
     const wave = this.getWave(type);
     if (!wave) return;
@@ -129,8 +133,9 @@ export default class SplashElement {
       // Fade out the wave
       wave.classList.add(this.cfg.class.hide);
     }
-    // If this is a hover wave, we need to reposition the wave before scaling
-    if (type === SP_HOVER) {
+    // If this is a hover or focus wave, we need
+    // to reposition the wave before scaling
+    if (type === SP_HOVER || type === SP_FOCUS) {
       // Center the wave where the cursor left the Splash element.
       wave.style.left = `${offset.x}px`;
       wave.style.top = `${offset.y}px`;
@@ -177,15 +182,26 @@ export default class SplashElement {
    * @returns {Number} offset.y - The calulcated top offset
    * @private
    */
-  getOffset(e) {
+  getOffset(e, type) {
     // Determine the offset of the element relative to the viewport
     const offset = getOffset(this.elem);
+    // Determine whether to get the mouse coordinates from the event itself
+    // or from the Splash object (for focus effect)
+    let mouseX = type === SP_FOCUS ? window.Splash.mouseX : e.pageX;
+    let mouseY = type === SP_FOCUS ? window.Splash.mouseY : e.pageY;
+    // If focusing the element using the keyboard, the mouse may be positioned
+    // outside of the element itself at the time of focus, so we need to
+    // constrain the mouse position to the bounding rectangle of the element.
+    if (mouseX < offset.x) mouseX = offset.x;
+    if (mouseY < offset.y) mouseY = offset.y;
+    if (mouseX > offset.x + offset.w) mouseX = offset.x + offset.w;
+    if (mouseY > offset.y + offset.h) mouseY = offset.y + offset.h;
     // Determine the position of the event (which will be used as the center of
     // the wave's circle) relative to this Splash element.
     // In order to get left|top values that are relative to the element, we
     // must subtract the element's offset from the co-ordinates of the event.
-    const posX = e.pageX - offset.x;
-    const posY = e.pageY - offset.y;
+    const posX = mouseX - offset.x;
+    const posY = mouseY - offset.y;
     // Return the calculated offset
     return {
       x: posX,
@@ -250,6 +266,10 @@ export default class SplashElement {
       case 'mouseenter':
       case 'mouseleave':
         type = SP_HOVER;
+        break;
+      case 'focus':
+      case 'blur':
+        type = SP_FOCUS;
         break;
       default:
         type = false;
@@ -357,7 +377,7 @@ export default class SplashElement {
     // Check if we should proceed with the effect
     if (!this.shouldContinue(type)) return;
     // Determine the offset of the event relative to the element
-    const offset = this.getOffset(e);
+    const offset = this.getOffset(e, type);
     // Create a new wave element inside our container
     const wave = this.createWave(type, this.cfg.class[`${type}Wave`]);
     // Apply the offset to the wave
@@ -425,9 +445,9 @@ export default class SplashElement {
     if (this.isWrapped) return;
     // Determine if we need to wrap the element alternatively,
     // e.g. for inputs that do not allow child elements.
-    const isVoid = SP_VOID.includes(this.elem.tagName.toLowerCase());
+    this.isVoid = SP_VOID.includes(this.elem.tagName.toLowerCase());
     // Wrap the element
-    this[`wrap${isVoid ? 'Void' : 'Default'}`]();
+    this[`wrap${this.isVoid ? 'Void' : 'Default'}`]();
   }
 
   /**
@@ -450,7 +470,7 @@ export default class SplashElement {
     const waves = newElem('div', [this.cfg.class.waves]);
     // Insert the waves before the content wrapper
     this.elem.insertBefore(waves, wrapper);
-    // Saves references to the waves container and the wrapper
+    // Saves references to the various elements
     this.waves = waves;
     this.wrapper = wrapper;
   }
@@ -479,7 +499,7 @@ export default class SplashElement {
     // We need to change the elem reference we have as it is expecting the
     // element with the base class.
     this.elem = parent;
-    // Save references to the waves container and the wrapper
+    // Saves references to the various elements
     this.waves = waves;
     this.wrapper = wrapper;
   }
