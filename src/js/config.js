@@ -9,6 +9,8 @@ export default {
     base: 'splash',
     clickWave: 'splash-click',
     clickOut: 'splash-click-out',
+    focusWave: 'splash-focus',
+    focusOut: 'splash-focus-out',
     disabled: 'disabled',
     hide: 'splash-hide',
     hoverWave: 'splash-hover',
