@@ -32,6 +32,8 @@ export function getOffset(element) {
   return {
     x: elemRect.left - bodyRect.left,
     y: elemRect.top - bodyRect.top,
+    w: elemRect.width,
+    h: elemRect.height,
   };
 }
 
