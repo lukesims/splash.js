@@ -3,7 +3,18 @@ import { isElem, isList } from './util';
 import defaultConfig from './config';
 import SplashElement from './splash-element';
 
-export default class Splash {
+class Splash {
+
+  /**
+   * Attachs global event listeners to the window
+   *
+   * @returns {undefined}
+   * @private
+   */
+  static addListeners() {
+    // Track the mouse movement for focus/blur events
+    window.addEventListener('mousemove', Splash.onMouseMove.bind(Splash), false);
+  }
 
   /**
    * Attach Splash functionality to a selection of elements on the page, that
@@ -101,4 +112,31 @@ export default class Splash {
     return [];
   }
 
+  /**
+   * Callback for the `mousemove` event on the window object.
+   *
+   * @param {Event} e
+   * @returns {undefined}
+   */
+  static onMouseMove(e) {
+    window.Splash.mouseX = e.pageX || 0;
+    window.Splash.mouseY = e.pageY || 0;
+  }
+
 }
+
+// Create an object on the window (sorry!) to hold some library-related info.
+window.Splash = {
+  // Holds the current co-ordinates of the mouse. Will be updated in the
+  // mousemove event callback. This is the only way to know where the mouse was
+  // when focusing an input, as the focus event is not a Mouse event and therefore
+  // does not contain the properties that tell us where the mouse is positioned.
+  // (https://stackoverflow.com/a/7984782/3389737)
+  mouseX: 0,
+  mouseY: 0,
+};
+
+// Add global event listeners
+Splash.addListeners();
+
+export default Splash;

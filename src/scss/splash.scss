@@ -25,18 +25,19 @@
   pointer-events: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  z-index: 1;
+  z-index: 2;
 }
 
 // The container for the original element's original content
 .#{$pre}-wrap {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
-// Both types of wave element
+// All types of wave element
 .#{$pre}-click,
-.#{$pre}-hover {
+.#{$pre}-hover,
+.#{$pre}-focus {
   display: block;
   position: absolute;
   width: 0;
@@ -76,5 +77,18 @@
     transform: translate(-50%, -50%) scale(1);
     background: $wave-hover-end-bg;
     opacity: $wave-hover-end-opacity;
+  }
+}
+
+// The wave element for the focus effect
+.#{$pre}-focus {
+  background: $wave-focus-start-bg;
+  opacity: $wave-focus-start-opacity;
+
+  // The class to spread the wave out
+  &.#{$pre}-focus-out {
+    transform: translate(-50%, -50%) scale(1);
+    background: $wave-focus-end-bg;
+    opacity: $wave-focus-end-opacity;
   }
 }

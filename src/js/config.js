@@ -2,12 +2,15 @@
 //   Separated into another file so it can be pulled into tests.
 export default {
   click: true,
-  hover: true,
+  focus: false,
+  hover: false,
   waitForMouseup: false,
   class: {
     base: 'splash',
     clickWave: 'splash-click',
     clickOut: 'splash-click-out',
+    focusWave: 'splash-focus',
+    focusOut: 'splash-focus-out',
     disabled: 'disabled',
     hide: 'splash-hide',
     hoverWave: 'splash-hover',
