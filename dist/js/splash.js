@@ -124,22 +124,34 @@
   // The default configuration for the library.
   //   Separated into another file so it can be pulled into tests.
   var defaultConfig = {
+    // Whether the click effect is enabled
     click: true,
+    // Whether the focus effect is enabled
     focus: false,
+    // Whether the hover effect is enabled
     hover: false,
+    // Whether to swap the z-index of the waves and content
+    // When false, the waves are _above_ the element's content
+    swap: false,
+    // Whether click waves should wait for the `mouseup` event to fade out.
+    // When false, wave fades out after fully covering the splash element.
     waitForMouseup: false,
+    // html/css class names employed by the library
     class: {
+      // For the base splash element
       base: 'splash',
+      swap: 'splash-swap',
+      // Wave and content wrappers
+      waves: 'splash-waves',
+      wrap: 'splash-wrap',
+      // For the wave elements
       clickWave: 'splash-click',
       clickOut: 'splash-click-out',
       focusWave: 'splash-focus',
       focusOut: 'splash-focus-out',
-      disabled: 'disabled',
       hide: 'splash-hide',
       hoverWave: 'splash-hover',
-      hoverOut: 'splash-hover-out',
-      waves: 'splash-waves',
-      wrap: 'splash-wrap'
+      hoverOut: 'splash-hover-out'
     }
   };
 
@@ -453,11 +465,21 @@
 
 
     /**
+     *
+     */
+    SplashElement.prototype.modify = function modify() {
+      // Swap z-indexes
+      this.elem.classList.toggle(this.cfg.class.swap, this.cfg.swap);
+    };
+
+    /**
      * Removes our event listeners from this Splash element
      *
      * @returns {undefined}
      * @private
      */
+
+
     SplashElement.prototype.removeListeners = function removeListeners() {
       // Hover
       this.elem.removeEventListener('mouseenter', this.handler.start, false);
@@ -602,6 +624,8 @@
       var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       this.cfg = Object.assign({}, config);
+      // Add/remove modifier classes if necessary
+      this.modify();
     };
 
     /**
@@ -633,6 +657,8 @@
     SplashElement.prototype.wrapDefault = function wrapDefault() {
       // Ensure the element has the base class
       this.elem.classList.add(this.cfg.class.base);
+      // Add modifier classes if necessary
+      this.modify();
       // Create our wrapper
       var wrapper = newElem('div', [this.cfg.class.wrap]);
       // Wrap the element's content
@@ -675,6 +701,8 @@
       // We need to change the elem reference we have as it is expecting the
       // element with the base class.
       this.elem = parent;
+      // Add modifier classes if necessary
+      this.modify();
       // Saves references to the various elements
       this.waves = waves;
       this.wrapper = wrapper;
@@ -683,7 +711,7 @@
     createClass(SplashElement, [{
       key: 'isDisabled',
       get: function get$$1() {
-        return this.elem.hasAttribute('disabled') || this.elem.classList.contains(this.cfg.class.disabled);
+        return this.elem.hasAttribute('disabled');
       }
 
       /**
@@ -831,7 +859,10 @@
     };
 
     /**
+     * Callback for the `mousemove` event on the window object.
      *
+     * @param {Event} e
+     * @returns {undefined}
      */
 
 
