@@ -30,6 +30,12 @@
   position: relative;
   z-index: 1; }
 
+.splash-swap .splash-waves {
+  z-index: 1; }
+
+.splash-swap .splash-wrap {
+  z-index: 2; }
+
 .splash-click,
 .splash-hover,
 .splash-focus {

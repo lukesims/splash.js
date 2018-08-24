@@ -284,8 +284,7 @@ export default class SplashElement {
    * @private
    */
   get isDisabled() {
-    return this.elem.hasAttribute('disabled')
-        || this.elem.classList.contains(this.cfg.class.disabled);
+    return this.elem.hasAttribute('disabled');
   }
 
   /**
@@ -296,6 +295,17 @@ export default class SplashElement {
    */
   get isWrapped() {
     return !!first(this.elem, this.cfg.class.waves);
+  }
+
+  /**
+   * Adds or removes modifier classes from the base element based on the
+   * current configuration.
+   *
+   * @returns {undefined}
+   */
+  modify() {
+    // Swap z-indexes
+    this.elem.classList.toggle(this.cfg.class.swap, this.cfg.swap);
   }
 
   /**
@@ -432,6 +442,8 @@ export default class SplashElement {
    */
   update(config = {}) {
     this.cfg = Object.assign({}, config);
+    // Add/remove modifier classes if necessary
+    this.modify();
   }
 
   /**
@@ -459,6 +471,8 @@ export default class SplashElement {
   wrapDefault() {
     // Ensure the element has the base class
     this.elem.classList.add(this.cfg.class.base);
+    // Add modifier classes if necessary
+    this.modify();
     // Create our wrapper
     const wrapper = newElem('div', [this.cfg.class.wrap]);
     // Wrap the element's content
@@ -499,6 +513,8 @@ export default class SplashElement {
     // We need to change the elem reference we have as it is expecting the
     // element with the base class.
     this.elem = parent;
+    // Add modifier classes if necessary
+    this.modify();
     // Saves references to the various elements
     this.waves = waves;
     this.wrapper = wrapper;
