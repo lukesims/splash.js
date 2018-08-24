@@ -34,6 +34,18 @@
   z-index: 1;
 }
 
+// Alternate z-index
+.#{$pre}-swap {
+  // Put waves behind
+  .#{$pre}-waves {
+    z-index: 1;
+  }
+  // Put content on top
+  .#{$pre}-wrap {
+    z-index: 2;
+  }
+}
+
 // All types of wave element
 .#{$pre}-click,
 .#{$pre}-hover,
