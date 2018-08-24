@@ -465,7 +465,10 @@
 
 
     /**
+     * Adds or removes modifier classes from the base element based on the
+     * current configuration.
      *
+     * @returns {undefined}
      */
     SplashElement.prototype.modify = function modify() {
       // Swap z-indexes

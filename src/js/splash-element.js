@@ -298,7 +298,10 @@ export default class SplashElement {
   }
 
   /**
+   * Adds or removes modifier classes from the base element based on the
+   * current configuration.
    *
+   * @returns {undefined}
    */
   modify() {
     // Swap z-indexes
